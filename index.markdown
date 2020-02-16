@@ -15,3 +15,6 @@ This is our SEPR group, named Krojan Horse (expanding on NP studios), GitHub pag
 ### [Assessment 2](./assessments/#assessment-2)
 > Here you can find all of our documentation for assessment 2 for this module. 
 
+### [Assessment 3](./assessments/#assessment-3)
+> Here you can find all of our documentation for assessment 3 for this module. 
+
