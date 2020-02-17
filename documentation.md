@@ -52,6 +52,8 @@ nav_order: 3
 ### Krojan Horse's Documentation
 > * Game Jar [JAR](/a3/kroy.jar)
 > * Updated Code [ZIP](/a3/code.zip)
+> * Change Report [PDF](/a3/Change3.pdf)
+> * Implementation Report [PDF](/a3/Impl3.pdf)
 
 ---
 ## Assessment 4
