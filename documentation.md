@@ -61,7 +61,7 @@ nav_order: 3
 
 ---
 
-## Assessment 4
+## Assessment 4 (CURRENT ASSESSMENT)
 
 > - Game Jar [JAR](/a4/game.jar)
 > - Implementation Report [PDF](/a4/Impl4.pdf)
@@ -69,5 +69,3 @@ nav_order: 3
 > - Evaluation and testing Report [PDF](/a4/ET4.pdf)
 > - Zipped Code [ZIP](https://drive.google.com/a/york.ac.uk/file/d/1T_mrRaeM9aF-7vetAOvEPvD9mMg5Veii/view?usp=sharing)
 > - Jacoco Test report [Link](/a4/html/index.html)
-
-> - Zip File:
