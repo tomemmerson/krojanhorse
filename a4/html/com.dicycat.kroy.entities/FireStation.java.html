@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FireStation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.entities</a> &gt; <span class="el_source">FireStation.java</span></div><h1>FireStation.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.entities;
+
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
+import com.dicycat.kroy.Kroy;
+import com.dicycat.kroy.screens.GameScreen;
+
+/**
+ * Friendly building which the user can return to to repair the truck or trigger the minigame to replenish water
+ *
+ * Edited by Lucy Ivatt - NP STUDIOS
+ */
+public class FireStation extends Entity {
+	
+<span class="nc" id="L15">	private static Texture textureLiving = Kroy.mainGameScreen.textures.getFireStation();</span>
+<span class="nc" id="L16">	private static Texture texturedead = Kroy.mainGameScreen.textures.getFireStationDead();</span>
+
+	public FireStation() {
+<span class="nc" id="L19">		super(new Vector2(Kroy.mainGameScreen.getSpawnPosition().x - textureLiving.getWidth()/2, Kroy.mainGameScreen.getSpawnPosition().y + 100),</span>
+<span class="nc" id="L20">				textureLiving, new Vector2(textureLiving.getWidth(),textureLiving.getHeight()), 100, 300, 1);</span>
+<span class="nc" id="L21">	}</span>
+
+	/**
+	 * Removes from active pool and displays destroyed texture
+	 */
+	@Override
+	public void die() { 
+<span class="nc" id="L28">		super.die();</span>
+<span class="nc" id="L29">		sprite.setTexture(texturedead);</span>
+<span class="nc" id="L30">		displayable = true;</span>
+<span class="nc" id="L31">	}</span>
+
+	/**
+	 * Checks if the player is in radius. If this is the case, calls repairTruck when the truck is damaged or calls the
+	 * minigame if the players water tank is not full. Also checks if the gameTimer is over and if so destroys the
+	 * firestation
+	 *
+	 * Added by Lucy Ivatt - NP STUDIOS
+	 */
+	public void update(){
+<span class="nc bnc" id="L41" title="All 2 branches missed.">		if(playerInRadius()){</span>
+<span class="nc" id="L42">			Kroy.mainGameScreen.getPlayer().repairTruck();</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">			if (!Kroy.mainGameScreen.getPlayer().isFull()) {</span>
+<span class="nc" id="L44">				Kroy.mainGameScreen.getPlayer().refillWater();</span>
+<span class="nc" id="L45">				Kroy.mainGameScreen.newMinigame();</span>
+<span class="nc" id="L46">				Kroy.mainGameScreen.setGameState(GameScreen.GameScreenState.MINIGAME);</span>
+			}
+		}
+<span class="nc bnc" id="L49" title="All 2 branches missed.">		if (Kroy.mainGameScreen.gameTimer &lt;= 0) {		//Once timer is over</span>
+<span class="nc" id="L50">			applyDamage(100);	//Destroy fire station</span>
+		}
+<span class="nc" id="L52">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

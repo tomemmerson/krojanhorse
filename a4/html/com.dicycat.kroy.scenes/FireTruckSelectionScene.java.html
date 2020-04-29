@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FireTruckSelectionScene.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.scenes</a> &gt; <span class="el_source">FireTruckSelectionScene.java</span></div><h1>FireTruckSelectionScene.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.scenes;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dicycat.kroy.Kroy;
+
+
+/**
+ * Window for selecting FireTruck type
+ * 
+ * @author Luke Taylor
+ *
+ */
+public class FireTruckSelectionScene {
+
+	public Stage stage;
+<span class="nc" id="L25">	public Table table = new Table();</span>
+	private SpriteBatch sb;
+<span class="nc" id="L27">	private NinePatchDrawable background = new NinePatchDrawable(new NinePatch(new Texture(&quot;Grey.png&quot;), 3, 3, 3, 3));</span>
+	
+<span class="nc" id="L29">    private Skin skin = new Skin(Gdx.files.internal(&quot;uiskin.json&quot;));</span>
+    
+    //Buttons initialised, labelled and stylised
+	// TRUCK_SELECT_CHANGE_9 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// Changed truck selection buttons to labels to show the user which colour firetruck has the stat boost, rather than
+	// let them pick a firetruck. Added a button to start the game.
+<span class="nc" id="L35">    public Label truck1 = new Label(&quot;Speed&quot;, skin);</span>
+<span class="nc" id="L36">    public Label truck2 = new Label(&quot;Damage&quot;, skin);</span>
+<span class="nc" id="L37">    public Label truck3 = new Label(&quot;Capacity&quot;, skin);</span>
+<span class="nc" id="L38">    public Label truck4 = new Label(&quot;Range&quot;, skin);</span>
+<span class="nc" id="L39">	public TextButton startGameButton = new TextButton(&quot;Start Game&quot;, skin);</span>
+	// TRUCK_SELECT_CHANGE_9 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+<span class="nc" id="L41">    private float width = Gdx.graphics.getWidth();</span>
+<span class="nc" id="L42">    private float centre = width* 0.7f;</span>
+
+<span class="nc" id="L44">	public FireTruckSelectionScene(Kroy game) {</span>
+<span class="nc" id="L45">		sb = game.batch;</span>
+<span class="nc" id="L46">		Viewport viewport = new ScreenViewport(new OrthographicCamera());</span>
+<span class="nc" id="L47">		stage = new Stage(viewport, sb);</span>
+
+<span class="nc" id="L49">		table.setBackground(background);</span>
+		
+		// Images added to the screen
+<span class="nc" id="L52">		table.add(new Image(new Texture(&quot;fireTruck1.png&quot;)));</span>
+<span class="nc" id="L53">		table.add(new Image(new Texture(&quot;fireTruck2.png&quot;)));</span>
+<span class="nc" id="L54">		table.add(new Image(new Texture(&quot;fireTruck3.png&quot;)));</span>
+<span class="nc" id="L55">		table.add(new Image(new Texture(&quot;fireTruck4.png&quot;)));</span>
+		
+<span class="nc" id="L57">		table.row();</span>
+
+		// TRUCK_SELECT_CHANGE_10 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+		// Set the text align of the labels to be in the center
+<span class="nc" id="L61">	    truck1.setAlignment(Align.center);</span>
+<span class="nc" id="L62">		truck2.setAlignment(Align.center);</span>
+<span class="nc" id="L63">		truck3.setAlignment(Align.center);</span>
+<span class="nc" id="L64">		truck4.setAlignment(Align.center);</span>
+		
+		// Buttons added to the screen - New: Added padding to the bottom of each cell.
+<span class="nc" id="L67">		table.add(truck1).width(centre/3.0f).pad(0,0,50,0);</span>
+<span class="nc" id="L68">	    table.add(truck2).width(centre/3.0f).pad(0,0,50,0);</span>
+<span class="nc" id="L69">	    table.add(truck3).width(centre/3.0f).pad(0,0,50,0);</span>
+<span class="nc" id="L70">	    table.add(truck4).width(centre/3.0f).pad(0,0,50,0);</span>
+
+<span class="nc" id="L72">	    table.row(); // Added a new row to the table</span>
+
+		// Added the startGameButton to the table and centered it in the table.
+<span class="nc" id="L75">	    table.add(startGameButton).width(centre/2.0f).colspan(4);</span>
+		// TRUCK_SELECT_CHANGE_10 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	    
+<span class="nc" id="L78">		table.setFillParent(true);</span>
+<span class="nc" id="L79">	    stage.addActor(table);</span>
+	    
+	    
+<span class="nc" id="L82">	}</span>
+	
+	/** Allows the window to be visible or hidden
+	 * @param state true if visible, false if hidden
+	 */
+	public void visibility(boolean state){
+<span class="nc" id="L88">		this.table.setVisible(state);</span>
+<span class="nc" id="L89">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameTextures.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy</a> &gt; <span class="el_source">GameTextures.java</span></div><h1>GameTextures.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy;
+
+import com.badlogic.gdx.graphics.Texture;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+/**
+ * Stores textures for classes to reference.
+ * This means multiple of the same sprite use the same reference.
+ * Because of this, render calls are reduced.
+ * 
+ * @author Riju De
+ *
+ */
+public class GameTextures {
+
+	// TRUCK_SELECT_CHANGE_1 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// Changed truck texture to truck0, truck1, truck2, truck3 as all the different textures will be used with our
+	// new selection method and defined the array list which will be used to store them
+	private Texture truck0, truck1, truck2, truck3, ufo, bullet, fireStation, fireStationDead;
+	private ArrayList&lt;Texture&gt; trucks;
+
+	// TRUCK_SELECT_CHANGE_1 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// NEW_FORTRESSES_1 - START OF MODIFICATION - NP STUDIOS - Alasdair Pilmore-Bedford ---------------------------
+	// Added new textures add for new fortresses
+<span class="nc" id="L27">	private Texture[] livingFortresses = {new Texture(&quot;cliffords tower.png&quot;), new Texture(&quot;york minster.png&quot;),</span>
+			new Texture(&quot;york museum.png&quot;), new Texture (&quot;YorkRailStationWithEvilAliens.png&quot;),
+			new Texture (&quot;YorkHospital.png&quot;), new Texture (&quot;CentralHall.png&quot;)};
+
+<span class="nc" id="L31">	private Texture[] deadFortresses = {new Texture(&quot;cliffords tower dead.png&quot;), new Texture(&quot;york minster dead.png&quot;),</span>
+			new Texture(&quot;york museum dead.png&quot;), new Texture (&quot;YorkRailStationDestoryed.png&quot;),
+			new Texture (&quot;YorkHospitalDeaded.png&quot;), new Texture (&quot;CentralHallDeaded.png&quot;)};
+	// NEW_FORTRESSES_1 - END OF MODIFICATION - NP STUDIOS - Alasdair Pilmore-Bedford ---------------------------
+
+<span class="nc" id="L36">	private String[] truckAddress = {&quot;fireTruck1.png&quot;, &quot;fireTruck2.png&quot;, &quot;fireTruck3.png&quot;, &quot;fireTruck4.png&quot;};</span>
+
+<span class="nc" id="L38">	public GameTextures() {</span>
+		// TRUCK_SELECT_CHANGE_2 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+		// Initialises all 4 truck texures and adds them to an array list rather than just the single texture used previously.
+<span class="nc" id="L41">		truck0 = new Texture(truckAddress[0]);</span>
+<span class="nc" id="L42">		truck1 = new Texture(truckAddress[1]);</span>
+<span class="nc" id="L43">		truck2 = new Texture(truckAddress[2]);</span>
+<span class="nc" id="L44">		truck3 = new Texture(truckAddress[3]);</span>
+<span class="nc" id="L45">		trucks = new ArrayList&lt;&gt;(Arrays.asList(truck0, truck1, truck2, truck3));</span>
+		// TRUCK_SELECT_CHANGE_2 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+<span class="nc" id="L47">		ufo = new Texture(&quot;ufo.png&quot;);</span>
+<span class="nc" id="L48">		bullet = new Texture(&quot;bullet.png&quot;);</span>
+<span class="nc" id="L49">		fireStation = new Texture(&quot;FireStationTemp.png&quot;);</span>
+<span class="nc" id="L50">		fireStationDead = new Texture(&quot;FireStationTempDead.png&quot;);	</span>
+<span class="nc" id="L51">	}</span>
+
+	// TRUCK_SELECT_CHANGE_3 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// Slightly edited the getter for the truck texture as it needs to access the arraylist trucks with the index
+	// of which truck was needed, whereas previously it would only access the texture of the truck the user selected
+	// before the game began.
+	public Texture getTruck(int truckNum) {
+<span class="nc" id="L58">		return trucks.get(truckNum);</span>
+	}
+	// TRUCK_SELECT_CHANGE_13 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	
+	public Texture getUFO() {
+<span class="nc" id="L63">		return ufo;</span>
+	}
+	
+	public Texture getBullet() {
+<span class="nc" id="L67">		return bullet;</span>
+	}
+	
+	public Texture getFortress(int fortress) {
+<span class="nc" id="L71">		return livingFortresses[fortress];</span>
+	}
+	
+	public Texture getDeadFortress(int fortress) {
+<span class="nc" id="L75">		return deadFortresses[fortress];</span>
+	}
+	
+	public Texture getFireStation() {
+<span class="nc" id="L79">		return fireStation;</span>
+	}
+	public Texture getFireStationDead() {
+<span class="nc" id="L82">		return fireStationDead;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

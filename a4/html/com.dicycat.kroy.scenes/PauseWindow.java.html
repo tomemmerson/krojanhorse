@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PauseWindow.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.scenes</a> &gt; <span class="el_source">PauseWindow.java</span></div><h1>PauseWindow.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.scenes;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dicycat.kroy.Kroy;
+
+/**
+ * Pause window
+ * 
+ * @author Michele Imbriani
+ *
+ */
+public class PauseWindow {
+	
+	public Stage stage;
+<span class="nc" id="L26">	public Table table = new Table();</span>
+	private SpriteBatch sb;
+<span class="nc" id="L28">	private NinePatch patch = new NinePatch(new Texture(&quot;loool.jpg&quot;), 3, 3, 3, 3);</span>
+<span class="nc" id="L29">	private NinePatchDrawable background = new NinePatchDrawable(patch);</span>
+	
+<span class="nc" id="L31">    private Skin skin = new Skin(Gdx.files.internal(&quot;uiskin.json&quot;));</span>
+<span class="nc" id="L32">    public TextButton resume = new TextButton(&quot;RESUME&quot;, skin);</span>
+<span class="nc" id="L33">    public TextButton exit = new TextButton(&quot;EXIT&quot;, skin);</span>
+<span class="nc" id="L34">    public TextButton menu = new TextButton(&quot;MENU&quot;, skin);</span>
+
+<span class="nc" id="L36">	public PauseWindow(Kroy game) {</span>
+<span class="nc" id="L37">		sb = game.batch;</span>
+<span class="nc" id="L38">		Viewport viewport = new ScreenViewport(new OrthographicCamera());</span>
+<span class="nc" id="L39">		stage = new Stage(viewport, sb);</span>
+
+<span class="nc" id="L41">		table.setBackground(background);</span>
+<span class="nc" id="L42">		table.row();</span>
+<span class="nc" id="L43">	    table.add(resume).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L44">		table.row();</span>
+<span class="nc" id="L45">	    table.add(menu).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L46">	    table.row();</span>
+<span class="nc" id="L47">	    table.add(exit).width(Kroy.CentreWidth());</span>
+	    
+<span class="nc" id="L49">		table.setFillParent(true);</span>
+<span class="nc" id="L50">	    stage.addActor(table);</span>
+<span class="nc" id="L51">	}</span>
+
+	/** Allows the window to be visible or hidden
+	 * @param state	true means visible, false means hidden
+	 */
+	public void visibility(boolean state){
+<span class="nc" id="L57">		this.table.setVisible(state);</span>
+<span class="nc" id="L58">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

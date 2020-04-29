@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Pattern.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.bullets</a> &gt; <span class="el_source">Pattern.java</span></div><h1>Pattern.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.bullets;
+
+import com.badlogic.gdx.math.Vector2;
+
+/**
+ * Stores patterns of bullets to fire
+ * 
+ * @author Riju De
+ *
+ */
+public class Pattern {
+	private Bullet[][] bullets; // Bullets to fire
+	private float waitTime; // Time between bullets
+	private Boolean aim; // Should the bullets be targeted towards the player
+	private float cooldown; // Time to wait after firing pattern
+	private int offset;
+	private int xtra;
+	private int patternDamage;
+	public int patternDifficulty;
+
+	/**
+	 * Create a static directional pattern, fires in a single defined direction
+	 * 
+	 * @param degree           Direction to shoot
+	 * @param speed            Speed of the bullets
+	 * @param range            Distance each bullet travels
+	 * @param timeBetweenShots Time before the next shot
+	 * @param patternLength    How many shots in the pattern
+	 * @param multi            How many bullets per shot (spread)
+	 * @param cooldown         Time after pattern to wait before firing the next
+	 *                         pattern
+	 */
+	public Pattern(int degree, int speed, int range, float timeBetweenShots, int patternLength, int multi, float cooldown,
+<span class="nc" id="L34">			int damage, int patternDifficulty) {</span>
+<span class="nc" id="L35">		this.patternDamage = damage;</span>
+<span class="nc" id="L36">		this.patternDifficulty = patternDifficulty;</span>
+<span class="nc" id="L37">		aim = true;</span>
+<span class="nc" id="L38">		waitTime = timeBetweenShots;</span>
+<span class="nc" id="L39">		bullets = new Bullet[patternLength][multi];</span>
+<span class="nc" id="L40">		this.cooldown = cooldown;</span>
+<span class="nc" id="L41">		offset = (multi - (multi % 2)) / 2;</span>
+<span class="nc" id="L42">		xtra = (1 - (multi % 2)) * 5;</span>
+<span class="nc" id="L43">		degree = 90 - degree; // Convert normal bearings (0 is up, clockwise) to LIBGDX Vector2 degrees (0 is</span>
+													// right, anti-clockwise)
+
+		// CODE_REFACTOR_2 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		// Deleted redundant code initializing this vector to 0 rather than just
+		// defining the variable.
+		Vector2 direction;
+		// CODE_REFACTOR_2 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT
+<span class="nc bnc" id="L51" title="All 2 branches missed.">		for (int i = 0; i &lt; patternLength; i++) {</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">			for (int j = 0; j &lt; multi; j++) {</span>
+<span class="nc" id="L53">				direction = new Vector2(1, 1);</span>
+<span class="nc" id="L54">				direction.setAngle(degree + ((j - offset) * 10) + xtra);</span>
+<span class="nc" id="L55">				bullets[i][j] = new Bullet(Vector2.Zero, direction, speed, range, patternDamage, patternDifficulty); // Create</span>
+																																																							// bullet
+			}
+		}
+<span class="nc" id="L59">	}</span>
+
+	/**
+	 * Create an aimed pattern
+	 * 
+	 * @param speed            Speed of the bullets
+	 * @param range            Distance each bullet travels
+	 * @param timeBetweenShots Time before the next shot
+	 * @param patternLength    How many shots in the pattern
+	 * @param multi            How many bullets per shot (spread)
+	 * @param cooldown         Time after pattern to wait before firing the next
+	 *                         pattern
+	 */
+	public Pattern(int speed, int range, float timeBetweenShots, int patternLength, int multi, float cooldown, int damage,
+<span class="nc" id="L73">			int patternDifficulty) {</span>
+<span class="nc" id="L74">		this.patternDamage = damage;</span>
+<span class="nc" id="L75">		this.patternDifficulty = patternDifficulty;</span>
+<span class="nc" id="L76">		this.aim = true;</span>
+<span class="nc" id="L77">		waitTime = timeBetweenShots;</span>
+<span class="nc" id="L78">		bullets = new Bullet[patternLength][multi];</span>
+<span class="nc" id="L79">		this.cooldown = cooldown;</span>
+<span class="nc" id="L80">		offset = (multi - (multi % 2)) / 2;</span>
+<span class="nc" id="L81">		xtra = (1 - (multi % 2)) * 5;</span>
+
+<span class="nc" id="L83">		Vector2 direction = Vector2.Zero;</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		for (int i = 0; i &lt; patternLength; i++) {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">			for (int j = 0; j &lt; multi; j++) {</span>
+<span class="nc" id="L86">				bullets[i][j] = new Bullet(Vector2.Zero, direction, speed, range, patternDamage, patternDifficulty); // Create</span>
+																																																							// bullet
+			}
+		}
+<span class="nc" id="L90">	}</span>
+
+	/**
+	 * Create a spiral pattern
+	 * 
+	 * @param clockwise        Should the spiral spin clockwise?
+	 * @param startAngle       Starting direction of the spiral
+	 * @param rotations        How many full rotations to perform
+	 * @param speed            Speed of the bullets
+	 * @param range            Distance each bullet travels
+	 * @param timeBetweenShots Time before the next shot
+	 * @param multi            How many bullets per shot (spread)
+	 * @param cooldown         Time after pattern to wait before firing the next
+	 *                         pattern
+	 */
+
+	// FORTRESS_DAMAGE_4 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE
+	// ----
+	// Created a new attribute &quot;patternDamage&quot; above and set it as damage which is
+	// passed in from Fortress. Done this in all 3 constructors
+	public Pattern(Boolean clockwise, int startAngle, int rotations, int speed, int range, float timeBetweenShots,
+<span class="nc" id="L111">			int multi, float cooldown, int damage, int patternDifficulty) {</span>
+<span class="nc" id="L112">		this.patternDamage = damage;</span>
+<span class="nc" id="L113">		this.patternDifficulty = patternDifficulty;</span>
+		// FORTRESS_HEALTH_4 - END OF MODIFICATION - NP STUDIOS
+<span class="nc" id="L115">		aim = false;</span>
+<span class="nc" id="L116">		waitTime = timeBetweenShots;</span>
+<span class="nc" id="L117">		int patternLength = rotations * 36;</span>
+<span class="nc" id="L118">		bullets = new Bullet[patternLength][multi];</span>
+<span class="nc" id="L119">		this.cooldown = cooldown;</span>
+<span class="nc" id="L120">		offset = (multi - (multi % 2)) / 2;</span>
+<span class="nc" id="L121">		xtra = (1 - (multi % 2)) * 5;</span>
+
+		int degree; // Convert normal bearings (0 is up, clockwise) to LIBGDX Vector2 degrees (0 is
+								// right, anti-clockwise)
+
+<span class="nc" id="L126">		Vector2 direction = Vector2.Zero;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		for (int i = 0; i &lt; patternLength; i++) {</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			degree = (clockwise) ? 10 : -10;</span>
+<span class="nc" id="L129">			degree = 90 - (i * degree) + startAngle;</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">			for (int j = 0; j &lt; multi; j++) {</span>
+<span class="nc" id="L131">				direction = new Vector2(1, 1);</span>
+<span class="nc" id="L132">				direction.setAngle(degree + ((j - offset) * 10) + xtra);</span>
+
+				// FORTRESS_DAMAGE_5 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE
+				// ----
+				// Pass patternDamage to the bullet constructor. Done this in all 3 constructors
+
+<span class="nc" id="L138">				bullets[i][j] = new Bullet(Vector2.Zero, direction, speed, range, patternDamage, patternDifficulty); // Create</span>
+																																																							// bullet
+
+				// FORTRESS_HEALTH_5 - END OF MODIFICATION - NP STUDIOS
+			}
+		}
+<span class="nc" id="L144">	}</span>
+
+	/**
+	 * @param set The set of bullets to fire
+	 * @return Set of bullets to fire
+	 */
+	public Bullet[] bulletSet(int set) {
+<span class="nc" id="L151">		return bullets[set];</span>
+	}
+
+	/**
+	 * Sets the direction of the bullets in the aimedSet
+	 * 
+	 * @param set    The set of bullets to fire
+	 * @param aimDir The direction the bullets should fire
+	 * @return Set of aimed bullets to fire
+	 */
+	public Bullet[] aimedSet(int set, Vector2 aimDir) {
+		Vector2 direction;
+<span class="nc bnc" id="L163" title="All 2 branches missed.">		for (int i = 0; i &lt; bullets[set].length; i++) {</span>
+<span class="nc" id="L164">			direction = new Vector2(1, 1);</span>
+<span class="nc" id="L165">			direction.setAngle(aimDir.angle() + ((i - offset) * 10) + xtra);</span>
+<span class="nc" id="L166">			bullets[set][i].changeDirection(direction);</span>
+		}
+<span class="nc" id="L168">		return bullets[set];</span>
+	}
+
+	public Boolean getAim() {
+<span class="nc" id="L172">		return aim;</span>
+	}
+
+	public Bullet[][] getBullets() {
+<span class="nc" id="L176">		return bullets;</span>
+	}
+
+	public float getWaitTime() {
+<span class="nc" id="L180">		return waitTime;</span>
+	}
+
+	public float getCooldown() {
+<span class="nc" id="L184">		return cooldown;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

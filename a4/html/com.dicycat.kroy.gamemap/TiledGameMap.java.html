@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TiledGameMap.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.gamemap</a> &gt; <span class="el_source">TiledGameMap.java</span></div><h1>TiledGameMap.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.gamemap;
+
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer.Cell;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+
+/**
+ * Represents the TiledGameMap that is displayed on the screen.
+ * 
+ * @author Martha Cartwright
+ *
+ */
+
+public class TiledGameMap{
+	
+	private TiledMap tiledMap;
+	private OrthogonalTiledMapRenderer tiledMapRenderer;
+
+<span class="nc" id="L23">	public TiledGameMap() {</span>
+<span class="nc" id="L24">		tiledMap = new TmxMapLoader().load(&quot;YorkMap.tmx&quot;);</span>
+<span class="nc" id="L25">		tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);</span>
+<span class="nc" id="L26">	}</span>
+
+
+	/**
+	 * Renders the road layer of the map
+	 * @param camera Active camera
+	 */
+	public void renderRoads(OrthographicCamera camera) {
+<span class="nc" id="L34">		tiledMapRenderer.setView(camera);</span>
+<span class="nc" id="L35">		tiledMapRenderer.render(new int[] {1,2});</span>
+<span class="nc" id="L36">	}</span>
+
+
+	/**
+	 * Renders the building layer and the window layer of the map
+	 * @param camera Active camera
+	 */
+	public void renderBuildings(OrthographicCamera camera) {
+<span class="nc" id="L44">		tiledMapRenderer.setView(camera);</span>
+<span class="nc" id="L45">		tiledMapRenderer.render(new int[] {3,4});</span>
+<span class="nc" id="L46">	}</span>
+
+<span class="nc" id="L48">	public void update(float delta) {}</span>
+
+
+	public void dispose() {
+<span class="nc" id="L52">		tiledMap.dispose();</span>
+<span class="nc" id="L53">	}</span>
+
+	/**
+	 * Gets the tile type at a row/column for a particular layer
+	 * @param layer Layer to check
+	 * @param col Column where tile is located
+	 * @param row Row where tile is located
+	 * @return tileType The type of tile at the given location of the given layer
+	 */
+	public TileType getTileTypeByCoordinate(int layer, int col, int row) {
+<span class="nc" id="L63">		Cell cell = ((TiledMapTileLayer) tiledMap.getLayers().get(layer)).getCell(col,row);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		if (cell != null) {</span>
+<span class="nc" id="L65">			TiledMapTile tile = cell.getTile();</span>
+			
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			if (tile != null) {</span>
+<span class="nc" id="L68">				int id = tile.getId();</span>
+<span class="nc" id="L69">				return TileType.getTileTypeByID(id);</span>
+			}
+		}
+<span class="nc" id="L72">		return null;</span>
+	}
+	
+
+	/**
+	 * Gets the tile type at a pixel position for a particular layer
+	 * @param layer Layer to check
+	 * @param x X position
+	 * @param y Y position
+	 * @return tileType The type of tile at the given location of the given layer
+	 */
+	public TileType getTileTypeByLocation(int layer, float x, float y) {
+<span class="nc" id="L84">		return this.getTileTypeByCoordinate(layer, (int)(x/TileType.TILE_SIZE), (int)(y/TileType.TILE_SIZE));</span>
+	}
+
+
+	/**
+	 * Gets the width of the map in tiles
+	 * @return width Map tile width
+	 */
+	public int getWidth() {
+<span class="nc" id="L93">		return ((TiledMapTileLayer) tiledMap.getLayers().get(0)).getWidth();</span>
+	}
+
+
+	/**
+	 * Gets the height of the map in tiles
+	 * @return height Map tile height
+	 */
+	public int getHeight() {
+<span class="nc" id="L102">		return ((TiledMapTileLayer) tiledMap.getLayers().get(0)).getHeight();</span>
+	}
+
+
+	/**
+	 * Get the number of layers in the map
+	 * @return Number of layers
+	 */
+	public int getLayers() {
+<span class="nc" id="L111">		return tiledMap.getLayers().getCount();</span>
+	}
+	
+	
+	/**
+	 * Gets the width of the map in pixels
+	 * @return width Map pixel width
+	 */
+	public int getPixelWidth() {
+<span class="nc" id="L120">		return this.getWidth() * TileType.TILE_SIZE;</span>
+	}
+	
+	/**
+	 * Gets the height of the map in pixels
+	 * @return height Map pixel height
+	 */
+	public int getPixelHeight() {
+<span class="nc" id="L128">		return this.getHeight() * TileType.TILE_SIZE;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

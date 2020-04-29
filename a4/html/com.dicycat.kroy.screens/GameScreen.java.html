@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameScreen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.screens</a> &gt; <span class="el_source">GameScreen.java</span></div><h1>GameScreen.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.screens;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dicycat.kroy.GameObject;
+import com.dicycat.kroy.GameTextures;
+import com.dicycat.kroy.Kroy;
+import com.dicycat.kroy.debug.DebugCircle;
+import com.dicycat.kroy.debug.DebugDraw;
+import com.dicycat.kroy.debug.DebugLine;
+import com.dicycat.kroy.debug.DebugRect;
+import com.dicycat.kroy.entities.Alien;
+import com.dicycat.kroy.entities.FireStation;
+import com.dicycat.kroy.entities.FireTruck;
+import com.dicycat.kroy.entities.Fortress;
+import com.dicycat.kroy.gamemap.TiledGameMap;
+import com.dicycat.kroy.minigame.Minigame;
+import com.dicycat.kroy.misc.Powerups;
+import com.dicycat.kroy.scenes.HUD;
+import com.dicycat.kroy.scenes.OptionsWindow;
+import com.dicycat.kroy.scenes.PauseWindow;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+/**
+ * Contains the main game logic
+ *
+ * @author Riju De
+ * @author lnt20
+ *
+ */
+public class GameScreen implements Screen{
+
+<span class="nc" id="L48">	public static enum GameScreenState{</span>
+<span class="nc" id="L49">		PAUSE,</span>
+<span class="nc" id="L50">		RUN,</span>
+<span class="nc" id="L51">		RESUME,</span>
+<span class="nc" id="L52">		MINIGAME</span>
+	}
+
+<span class="nc" id="L55">	private Preferences prefs = Gdx.app.getPreferences(&quot;saves&quot;);</span>
+	public Kroy game;
+	public GameTextures textures;
+
+<span class="nc" id="L59">	public static Boolean showDebug = false;</span>
+	public float gameTimer; //Timer to destroy station.
+	// MINIMAP_1 - START OF MODIFICATION - NP STUDIOS - BETHANY GILMORE
+<span class="nc" id="L62">	private Texture minimap = new Texture(&quot;YorkMap.png&quot;); // A .png version of the tilemap background to use as the background texture for the minimap.</span>
+	// MINIMAP_1 - END OF MODIFICATION - NP STUDIOS - BETHANY GILMORE
+
+<span class="nc" id="L65">	public GameScreenState state = GameScreenState.RUN;</span>
+
+	public static TiledGameMap gameMap;
+
+	private OrthographicCamera gamecam;	//follows along what the port displays
+	private Viewport gameport;
+
+	private HUD hud;
+	private PauseWindow pauseWindow;
+	private OptionsWindow optionsWindow;
+	private Minigame minigame;
+
+	// TRUCK_SELECT_CHANGE_11 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// Slightly edited trucks statistics to make the game more balanced.
+<span class="nc" id="L79">	private Float[][] truckStats = {	//Each list is a configuration of a specific truck. {speed, flowRate, capacity, range}</span>
+<span class="nc" id="L80">			{450f, 1f, 400f, 300f},		//Speed</span>
+<span class="nc" id="L81">			{300f, 2f, 400f, 300f},	//Flow rate</span>
+<span class="nc" id="L82">			{300f, 1f, 500f, 300f},		//Capacity</span>
+<span class="nc" id="L83">			{300f, 1f, 400f, 450f}		//Range</span>
+		};
+
+	// Changes variable of truckNum to activeTruck
+	private int activeTruck; // Identifies the truck that is currently selected
+	// Deleted the variable player and replaced it with an ArrayList containing the 4 trucks and named it players
+	private ArrayList&lt;FireTruck&gt; players;
+	// TRUCK_SELECT_CHANGE_11 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+<span class="nc" id="L91">	private int lives = 4;</span>
+
+<span class="nc" id="L93">	private Powerups ampedpu = new Powerups(new Texture (Gdx.files.internal(&quot;ampedpu.png&quot;)), 5476, 1434, 1);</span>
+<span class="nc" id="L94">	private Powerups damagepu = new Powerups(new Texture (Gdx.files.internal(&quot;damagepu.png&quot;)), 3357, 3717, 2);</span>
+<span class="nc" id="L95">	private Powerups healthpu = new Powerups(new Texture (Gdx.files.internal(&quot;healthpu.png&quot;)), 4332, 5297, 3);</span>
+<span class="nc" id="L96">	private Powerups shieldpu = new Powerups(new Texture (Gdx.files.internal(&quot;shieldpu.png&quot;)), 1758, 4624, 4);</span>
+<span class="nc" id="L97">	private Powerups waterpu = new Powerups(new Texture (Gdx.files.internal(&quot;waterpu.png&quot;)), 2537, 596, 5);</span>
+
+<span class="nc" id="L99">	private Powerups[] powerups = {ampedpu, damagepu, healthpu, shieldpu, waterpu};</span>
+
+<span class="nc" id="L101">	private int gameDifficulty = 1;</span>
+
+	private int fortressesCount;
+	private Vector2 spawnPosition;	//Coordinates the player spawns at
+
+	private List&lt;GameObject&gt; gameObjects, deadObjects;	//List of active game objects
+<span class="nc" id="L107">	private List&lt;GameObject&gt; objectsToRender = new ArrayList&lt;GameObject&gt;(); // List of game objects that have been updated but need rendering</span>
+	private List&lt;GameObject&gt; objectsToAdd;
+	private List&lt;DebugDraw&gt; debugObjects; //List of debug items
+
+	// TRUCK_SELECT_CHANGE_12 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// Removed truckNum from constructor parameters
+<span class="nc" id="L113">	public GameScreen(Kroy _game) {</span>
+		// END_GAME_FIX_1 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+<span class="nc" id="L115">		fortressesCount = 6; // Initialize fortress count to 6</span>
+		// END_GAME_FIX_1 - END OF MODIFICATION - NP STUDIOS
+<span class="nc" id="L117">		game = _game;</span>
+<span class="nc" id="L118">		gamecam = new OrthographicCamera();</span>
+<span class="nc" id="L119">		gameport = new FitViewport(Kroy.width, Kroy.height, gamecam);	//Mic:could also use StretchViewPort to make the screen stretch instead of adapt</span>
+<span class="nc" id="L120">		gameMap = new TiledGameMap();										//or FitPort to make it fit into a specific width/height ratio</span>
+<span class="nc" id="L121">		pauseWindow = new PauseWindow(game);</span>
+<span class="nc" id="L122">		pauseWindow.visibility(false);</span>
+<span class="nc" id="L123">		optionsWindow = new OptionsWindow(game);</span>
+<span class="nc" id="L124">		optionsWindow.visibility(false);</span>
+//		minigame = new Minigame(game);
+//		minigame.visibility(false);
+<span class="nc" id="L127">		textures = new GameTextures(); // removed truckNum from GameTextures constructor call</span>
+		// FIRESTATION_RANGE_FIX_1 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		// Edited coordinate so firestation is in the middle of the square
+<span class="nc" id="L130">		spawnPosition = new Vector2(234 * 16, 3900);</span>
+		// FIRESTATION_RANGE_FIX_1 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT
+<span class="nc" id="L132">		gameTimer = 60 * 15; //Set timer to 15 minutes</span>
+<span class="nc" id="L133">		hud = new HUD(game.batch, gameTimer);</span>
+<span class="nc" id="L134">		players = new ArrayList&lt;&gt;(); // Initialise the array which will contain the 4 fire trucks</span>
+
+<span class="nc" id="L136">	}</span>
+	// TRUCK_SELECT_CHANGE_12 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+
+	/**
+	 * Initializes the screen which is first shown
+	 */
+	@Override
+	public void show() {
+<span class="nc" id="L144">		objectsToAdd = new ArrayList&lt;GameObject&gt;();</span>
+<span class="nc" id="L145">		gameObjects = new ArrayList&lt;GameObject&gt;();</span>
+<span class="nc" id="L146">		deadObjects = new ArrayList&lt;GameObject&gt;();</span>
+<span class="nc" id="L147">		debugObjects = new ArrayList&lt;DebugDraw&gt;();</span>
+
+		// TRUCK_SELECT_CHANGE_13 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+		// Adds all the different firetruck types to the players ArrayList
+<span class="nc" id="L151">		players.add(new FireTruck(new Vector2(spawnPosition.x + 50, spawnPosition.y), truckStats[0], 0));</span>
+<span class="nc" id="L152">		players.add(new FireTruck(new Vector2(spawnPosition.x - 50, spawnPosition.y), truckStats[1], 1));</span>
+<span class="nc" id="L153">		players.add(new FireTruck(new Vector2(spawnPosition.x, spawnPosition.y), truckStats[2], 2));</span>
+<span class="nc" id="L154">		players.add(new FireTruck(new Vector2(spawnPosition.x, spawnPosition.y - 50), truckStats[3], 3));</span>
+
+		// Iterates through the players array lists and adds them to gameObjects.
+<span class="nc bnc" id="L157" title="All 2 branches missed.">		for (FireTruck truck : players) {</span>
+<span class="nc" id="L158">			gameObjects.add(truck);	//Player</span>
+<span class="nc" id="L159">		}</span>
+
+		// Sets initial camera position to the active truck's position (set to arbitrary truck at the beginning of the game)
+<span class="nc" id="L162">		gamecam.translate(new Vector2(players.get(activeTruck).getX(),players.get(activeTruck).getY())); // sets initial Camera position</span>
+		// TRUCK_SELECT_CHANGE_13 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+
+<span class="nc" id="L165">		gameObjects.add(new FireStation());</span>
+
+		// PATROLS_3 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT ------------
+		// Creates the aliens for the patrols and adds them to gameObjects so they can be updated each tick
+<span class="nc" id="L169">		int timeBetween = 50;</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		for (int patrolNum = 1; patrolNum &lt;=4; patrolNum++)</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">		for (int i = 0; i &lt; 5; i++) {</span>
+<span class="nc" id="L172">			gameObjects.add(new Alien(patrolNum, i * timeBetween, 300, gameDifficulty));</span>
+		}
+		// PATROLS_4 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT ------------
+
+
+		// FORTRESS_HEALTH_1 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE ----
+		// Added health and damage values for each fortress instantiation
+		// Added new fortresses and set position in accordance with collisions on tiled map
+<span class="nc" id="L180">		gameObjects.add(new Fortress(new Vector2(2903,3211),textures.getFortress(0), textures.getDeadFortress(0),</span>
+				new Vector2(256, 218), 400, 5, gameDifficulty, 0));
+<span class="nc" id="L182">		gameObjects.add(new Fortress(new Vector2(3200,5681), textures.getFortress(1), textures.getDeadFortress(1),</span>
+				new Vector2(256, 320), 500, 10, gameDifficulty, 1));
+<span class="nc" id="L184">		gameObjects.add(new Fortress(new Vector2(2050,1937), textures.getFortress(2), textures.getDeadFortress(2),</span>
+				new Vector2(400, 240), 600, 15, gameDifficulty, 2));
+<span class="nc" id="L186">		gameObjects.add(new Fortress(new Vector2(4496,960), textures.getFortress(3), textures.getDeadFortress(3),</span>
+				new Vector2(345, 213), 700, 20, gameDifficulty, 3));
+<span class="nc" id="L188">		gameObjects.add(new Fortress(new Vector2(6112,1100), textures.getFortress(4), textures.getDeadFortress(4),</span>
+				new Vector2(300, 240), 800, 25, gameDifficulty, 4)); //382, 319
+<span class="nc" id="L190">		gameObjects.add(new Fortress(new Vector2(600,4000), textures.getFortress(5), textures.getDeadFortress(5),</span>
+				new Vector2(300, 270), 900, 30, gameDifficulty, 5)); //45, 166
+		// FORTRESS_HEALTH_1 &amp; NEW_FORTRESSES_2 - END OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE  &amp; ALASDAIR PILMORE-BEDFORD
+<span class="nc" id="L193">	}</span>
+
+	/**
+	 * Called every frame and calls the methods to update and render the game objects, as well as handling input.
+	 */
+	public void render(float delta) {
+<span class="nc" id="L199">		Gdx.input.setInputProcessor(pauseWindow.stage);  //Set input processor</span>
+<span class="nc" id="L200">		pauseWindow.stage.act();</span>
+
+<span class="nc bnc" id="L202" title="All 5 branches missed.">		switch (state) {</span>
+			case RUN:
+<span class="nc bnc" id="L204" title="All 8 branches missed.">				if (Gdx.input.isKeyPressed(Keys.P) || Gdx.input.isKeyPressed(Keys.O) || Gdx.input.isKeyPressed(Keys.M)|| Gdx.input.isKeyPressed(Keys.ESCAPE)){</span>
+<span class="nc" id="L205">					pauseWindow.visibility(true);</span>
+<span class="nc" id="L206">					pause();</span>
+				}
+<span class="nc bnc" id="L208" title="All 2 branches missed.">				if (Gdx.input.isKeyJustPressed(Keys.K)){</span>
+<span class="nc" id="L209">					int fireTruckNum = 0;</span>
+<span class="nc" id="L210">					int fortressNum = 0;</span>
+<span class="nc" id="L211">					int alienNum = 0;</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">					for (GameObject gameObject : gameObjects) {</span>
+<span class="nc" id="L213">						String objectType = gameObject.getClass().getSimpleName();</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">						if (objectType.equals(&quot;FireTruck&quot;)) {</span>
+<span class="nc" id="L215">							prefs.putInteger(&quot;FireTruck&quot; + fireTruckNum + &quot;Health&quot;, ((FireTruck) gameObject).getHealthPoints());</span>
+<span class="nc" id="L216">							prefs.putInteger(&quot;FireTruck&quot; + fireTruckNum + &quot;MaxHealth&quot;, ((FireTruck) gameObject).getMaxHealthPoints());</span>
+<span class="nc" id="L217">							prefs.putFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;X&quot;, ((FireTruck) gameObject).getX());</span>
+<span class="nc" id="L218">							prefs.putFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;Y&quot;, ((FireTruck) gameObject).getY());</span>
+<span class="nc" id="L219">							prefs.putFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;Speed&quot;, ((FireTruck) gameObject).getSpeed());</span>
+<span class="nc" id="L220">							prefs.putFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;FlowRate&quot;, ((FireTruck) gameObject).getFlowRate());</span>
+<span class="nc" id="L221">							prefs.putFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;MaxWater&quot;, ((FireTruck) gameObject).getMaxWater());</span>
+<span class="nc" id="L222">							prefs.putFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;CurrentWater&quot;, ((FireTruck) gameObject).getCurrentWater());</span>
+<span class="nc" id="L223">							prefs.putFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;Range&quot;, ((FireTruck) gameObject).getRange());</span>
+<span class="nc" id="L224">							prefs.putFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;Rotation&quot;, ((FireTruck) gameObject).getRotation());</span>
+<span class="nc" id="L225">							prefs.putInteger(&quot;FireTruck&quot; + fireTruckNum + &quot;TruckNum&quot;, ((FireTruck) gameObject).getTruckNum());</span>
+<span class="nc" id="L226">							prefs.putBoolean(&quot;FireTruck&quot; + fireTruckNum + &quot;Selected&quot;, ((FireTruck) gameObject).getSelected());</span>
+<span class="nc" id="L227">							fireTruckNum++;</span>
+						}
+<span class="nc bnc" id="L229" title="All 2 branches missed.">						else if (objectType.equals(&quot;Fortress&quot;)) {</span>
+<span class="nc" id="L230">							prefs.putFloat(&quot;Fortress&quot; + fortressNum + &quot;X&quot;, ((Fortress) gameObject).getX());</span>
+<span class="nc" id="L231">							prefs.putFloat(&quot;Fortress&quot; + fortressNum + &quot;Y&quot;, ((Fortress) gameObject).getY());</span>
+<span class="nc" id="L232">							prefs.putInteger(&quot;Fortress&quot; + fortressNum + &quot;ID&quot;, ((Fortress) gameObject).getFortressID());</span>
+<span class="nc" id="L233">							prefs.putFloat(&quot;Fortress&quot; + fortressNum + &quot;SizeX&quot;, ((Fortress) gameObject).getFortressSize().x);</span>
+<span class="nc" id="L234">							prefs.putFloat(&quot;Fortress&quot; + fortressNum + &quot;SizeY&quot;, ((Fortress) gameObject).getFortressSize().y);</span>
+<span class="nc" id="L235">							prefs.putInteger(&quot;Fortress&quot; + fortressNum + &quot;Health&quot;, ((Fortress) gameObject).getHealthPoints());</span>
+<span class="nc" id="L236">							prefs.putInteger(&quot;Fortress&quot; + fortressNum + &quot;MaxHealth&quot;, ((Fortress) gameObject).getMaxHealthPoints());</span>
+<span class="nc" id="L237">							prefs.putInteger(&quot;Fortress&quot; + fortressNum + &quot;Damage&quot;, ((Fortress) gameObject).getDamage());</span>
+<span class="nc" id="L238">							prefs.putInteger(&quot;Fortress&quot; + fortressNum + &quot;Difficulty&quot;, ((Fortress) gameObject).getEntityDifficulty());</span>
+<span class="nc" id="L239">							fortressNum++;</span>
+						}
+<span class="nc bnc" id="L241" title="All 2 branches missed.">						else if (objectType.equals(&quot;Alien&quot;)) {</span>
+<span class="nc" id="L242">							prefs.putInteger(&quot;Alien&quot; + alienNum + &quot;PatrolNum&quot;, ((Alien) gameObject).getPatrolNumber());</span>
+<span class="nc" id="L243">							prefs.putFloat(&quot;Alien&quot; + alienNum + &quot;MovementCountdown&quot;, ((Alien) gameObject).getInitialMovementCountdown());</span>
+<span class="nc" id="L244">							prefs.putInteger(&quot;Alien&quot; + alienNum + &quot;Difficulty&quot;, ((Alien) gameObject).getEntityDifficulty());</span>
+<span class="nc" id="L245">							alienNum++;</span>
+						}
+<span class="nc" id="L247">					}</span>
+<span class="nc" id="L248">					prefs.putInteger(&quot;fireTruckNum&quot;, fireTruckNum);</span>
+<span class="nc" id="L249">					prefs.putInteger(&quot;fortressNum&quot;, fortressNum);</span>
+<span class="nc" id="L250">					prefs.putInteger(&quot;alienNum&quot;, alienNum);</span>
+<span class="nc" id="L251">					prefs.putFloat(&quot;gameTimer&quot;, gameTimer);</span>
+<span class="nc" id="L252">					prefs.flush();</span>
+				}
+<span class="nc bnc" id="L254" title="All 2 branches missed.">				if (Gdx.input.isKeyJustPressed(Keys.L)){</span>
+<span class="nc" id="L255">					float newGameTimer = prefs.getFloat(&quot;gameTimer&quot;);</span>
+<span class="nc" id="L256">					hud.setTimer(newGameTimer);</span>
+<span class="nc" id="L257">					gameTimer = newGameTimer;</span>
+
+<span class="nc" id="L259">					players.clear();</span>
+<span class="nc" id="L260">					gameObjects.clear();</span>
+
+<span class="nc bnc" id="L262" title="All 2 branches missed.">					for (int fireTruckNum = 0; fireTruckNum &lt; prefs.getInteger(&quot;fireTruckNum&quot;); fireTruckNum++) {</span>
+<span class="nc" id="L263">						FireTruck fireTruck = new FireTruck(new Vector2(0, 0), truckStats[0], prefs.getInteger(&quot;FireTruck&quot; + fireTruckNum + &quot;TruckNum&quot;));</span>
+
+<span class="nc" id="L265">						fireTruck.setHealthPoints(prefs.getInteger(&quot;FireTruck&quot; + fireTruckNum + &quot;Health&quot;));</span>
+<span class="nc" id="L266">						fireTruck.setMaxHealthPoints(prefs.getInteger(&quot;FireTruck&quot; + fireTruckNum + &quot;MaxHealth&quot;));</span>
+<span class="nc" id="L267">						fireTruck.setPosition(new Vector2(prefs.getFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;X&quot;), prefs.getFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;Y&quot;)));</span>
+<span class="nc" id="L268">						fireTruck.setSpeed(prefs.getFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;Speed&quot;));</span>
+<span class="nc" id="L269">						fireTruck.setFlowRate(prefs.getFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;FlowRate&quot;));</span>
+<span class="nc" id="L270">						fireTruck.setMaxWater(prefs.getFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;MaxWater&quot;));</span>
+<span class="nc" id="L271">						fireTruck.setCurrentWater(prefs.getFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;CurrentWater&quot;));</span>
+<span class="nc" id="L272">						fireTruck.setRange(prefs.getFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;Range&quot;));</span>
+<span class="nc" id="L273">						fireTruck.setRotation(prefs.getFloat(&quot;FireTruck&quot; + fireTruckNum + &quot;Rotation&quot;));</span>
+<span class="nc" id="L274">						fireTruck.setSelected(prefs.getBoolean(&quot;FireTruck&quot; + fireTruckNum + &quot;Selected&quot;));</span>
+
+<span class="nc" id="L276">						players.add(fireTruck);</span>
+<span class="nc" id="L277">						gameObjects.add(fireTruck);</span>
+					}
+
+<span class="nc bnc" id="L280" title="All 2 branches missed.">					for (int fortressNum = 0; fortressNum &lt; prefs.getInteger(&quot;fortressNum&quot;); fortressNum++) {</span>
+<span class="nc" id="L281">						Fortress fortress = new Fortress(new Vector2(prefs.getFloat(&quot;Fortress&quot; + fortressNum + &quot;X&quot;), prefs.getFloat(&quot;Fortress&quot; + fortressNum + &quot;Y&quot;)),</span>
+<span class="nc" id="L282">								textures.getFortress(prefs.getInteger(&quot;Fortress&quot; + fortressNum + &quot;ID&quot;)),</span>
+<span class="nc" id="L283">								textures.getDeadFortress(prefs.getInteger(&quot;Fortress&quot; + fortressNum + &quot;ID&quot;)),</span>
+<span class="nc" id="L284">								new Vector2(prefs.getFloat(&quot;Fortress&quot; + fortressNum + &quot;SizeX&quot;), prefs.getFloat(&quot;Fortress&quot; + fortressNum + &quot;SizeY&quot;)),</span>
+<span class="nc" id="L285">								prefs.getInteger(&quot;Fortress&quot; + fortressNum + &quot;Health&quot;),</span>
+<span class="nc" id="L286">								prefs.getInteger(&quot;Fortress&quot; + fortressNum + &quot;Damage&quot;),</span>
+<span class="nc" id="L287">								prefs.getInteger(&quot;Fortress&quot; + fortressNum + &quot;Difficulty&quot;),</span>
+<span class="nc" id="L288">								prefs.getInteger(&quot;Fortress&quot; + fortressNum + &quot;ID&quot;));</span>
+
+<span class="nc" id="L290">						fortress.setMaxHealthPoints(prefs.getInteger(&quot;Fortress&quot; + fortressNum + &quot;MaxHealth&quot;));</span>
+
+<span class="nc" id="L292">						gameObjects.add(fortress);</span>
+					}
+
+<span class="nc bnc" id="L295" title="All 2 branches missed.">					for (int alienNum = 0; alienNum &lt; prefs.getInteger(&quot;alienNum&quot;); alienNum++) {</span>
+<span class="nc" id="L296">						gameObjects.add(new Alien(prefs.getInteger(&quot;Alien&quot; + alienNum + &quot;PatrolNum&quot;),</span>
+<span class="nc" id="L297">								prefs.getFloat(&quot;Alien&quot; + alienNum + &quot;MovementCountdown&quot;),</span>
+								300,
+<span class="nc" id="L299">								prefs.getInteger(&quot;Alien&quot; + alienNum + &quot;Difficulty&quot;)));</span>
+					}
+
+<span class="nc" id="L302">					gameObjects.add(new FireStation());</span>
+				}
+				// TRUCK_SELECT_CHANGE_14 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+				// Sets active truck depending on which number key is pressed
+<span class="nc bnc" id="L306" title="All 4 branches missed.">				if (Gdx.input.isKeyPressed(Keys.NUM_1) &amp;&amp; !players.get(0).isRemove()) {</span>
+<span class="nc" id="L307">					activeTruck = 0;</span>
+				}
+<span class="nc bnc" id="L309" title="All 4 branches missed.">				else if (Gdx.input.isKeyPressed(Keys.NUM_2) &amp;&amp; !players.get(1).isRemove()) {</span>
+<span class="nc" id="L310">					activeTruck = 1;</span>
+				}
+<span class="nc bnc" id="L312" title="All 4 branches missed.">				else if (Gdx.input.isKeyPressed(Keys.NUM_3) &amp;&amp; !players.get(2).isRemove()) {</span>
+<span class="nc" id="L313">					activeTruck = 2;</span>
+				}
+<span class="nc bnc" id="L315" title="All 4 branches missed.">				else if (Gdx.input.isKeyPressed(Keys.NUM_4) &amp;&amp; !players.get(3).isRemove()) {</span>
+<span class="nc" id="L316">					activeTruck = 3;</span>
+				}
+
+<span class="nc" id="L319">				selectTruck();</span>
+
+				// TRUCK_SELECT_CHANGE_14 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+
+<span class="nc" id="L323">				gameTimer -= delta;		//Decrement timer</span>
+
+<span class="nc" id="L325">				updateLoop(); //Update all game objects positions but does not render them as to be able to render everything as quickly as possible</span>
+
+<span class="nc" id="L327">				gameMap.renderRoads(gamecam); // Render the background roads, fields and rivers</span>
+
+<span class="nc" id="L329">				game.batch.begin();</span>
+
+<span class="nc" id="L331">				game.batch.end();</span>
+
+<span class="nc" id="L333">				game.batch.setProjectionMatrix(hud.stage.getCamera().combined);</span>
+<span class="nc" id="L334">				game.batch.setProjectionMatrix(gamecam.combined);	//Mic:only renders the part of the map where the camera is</span>
+<span class="nc" id="L335">				game.batch.begin(); // Game loop Start</span>
+
+<span class="nc" id="L337">				hud.update(delta);</span>
+
+<span class="nc" id="L339">				renderObjects(); // Renders objects specified in the UpdateLoop() called previously</span>
+
+<span class="nc" id="L341">				game.batch.end();</span>
+
+<span class="nc" id="L343">				gameMap.renderBuildings(gamecam); // Renders the buildings and the foreground items which are not entities</span>
+
+<span class="nc" id="L345">				hud.stage.draw();</span>
+
+				//Powerup Drawing
+<span class="nc" id="L348">				SpriteBatch spritebatch = new SpriteBatch();</span>
+				double powerupdistance;
+				//gamecam.unproject(gamecam.position.x, gamecam.position.y, gamecam.viewportWidth, gamecam.viewportHeight);
+				//gamecam.
+<span class="nc" id="L352">				spritebatch.begin();</span>
+<span class="nc" id="L353">				spritebatch.setProjectionMatrix(gamecam.combined);</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">				for (Powerups powerup : powerups) {</span>
+<span class="nc" id="L355">					powerup.UpdateTimer(players.get(activeTruck), Gdx.graphics.getDeltaTime());</span>
+
+<span class="nc" id="L357">					powerupdistance = Math.sqrt(Math.pow((((powerup.x + 32) - players.get(activeTruck).getX())), 2) + Math.pow((((powerup.y + 32) - players.get(activeTruck).getY())), 2));</span>
+<span class="nc bnc" id="L358" title="All 4 branches missed.">					if (powerup.visible &amp;&amp; powerupdistance &lt;= 60) {</span>
+<span class="nc" id="L359">						powerup.visible = false;</span>
+<span class="nc" id="L360">						powerup.PowerupChooser(players.get(activeTruck));</span>
+					}
+<span class="nc bnc" id="L362" title="All 2 branches missed.">					if (powerup.visible) {</span>
+<span class="nc" id="L363">						spritebatch.draw(powerup.powerupTexture, powerup.x, powerup.y, 64, 64);</span>
+					}
+				}
+<span class="nc" id="L366">				spritebatch.end();</span>
+
+				//Shield Powerup
+<span class="nc bnc" id="L369" title="All 2 branches missed.">				 if(!players.get(activeTruck).canBeHit){</span>
+<span class="nc" id="L370">					 players.get(activeTruck).fullRepairTruck();</span>
+				 }
+
+				// MINIMAP_2 - START OF MODIFICATION - NP STUDIOS - BETHANY GILMORE -----------------
+<span class="nc" id="L374">				drawMinimap();</span>
+				// MINIMAP_2 - END OF MODIFICATION - NP STUDIOS - BETHANY GILMORE ---------------------
+<span class="nc" id="L376">				pauseWindow.stage.draw();</span>
+
+<span class="nc bnc" id="L378" title="All 2 branches missed.">				if (showDebug) {</span>
+<span class="nc" id="L379">					DrawDebug(); //Draw all debug items as they have to be drawn outside the batch</span>
+				}
+
+				break;
+			case PAUSE:
+<span class="nc" id="L384">				pauseWindow.stage.draw();</span>
+<span class="nc" id="L385">				clickCheck();</span>
+<span class="nc" id="L386">				break;</span>
+			case RESUME:
+<span class="nc" id="L388">				pauseWindow.visibility(false);</span>
+<span class="nc" id="L389">				setGameState(GameScreenState.RUN);</span>
+<span class="nc" id="L390">				break;</span>
+			case MINIGAME:
+<span class="nc" id="L392">				Gdx.input.setInputProcessor(minigame.stage);</span>
+<span class="nc" id="L393">				minigame.visibility(true);</span>
+<span class="nc" id="L394">				minigame.stage.draw();</span>
+<span class="nc" id="L395">				minigame.stage.act();</span>
+<span class="nc" id="L396">				minigame.clickCheck();</span>
+<span class="nc" id="L397">				break;</span>
+			default:
+				break;
+		}
+<span class="nc" id="L401">	}</span>
+
+	public void newMinigame(){
+<span class="nc" id="L404">		minigame = new Minigame(game, true);</span>
+<span class="nc" id="L405">	}</span>
+
+	/**
+	 * Updates all the active gameobjects and adds them to the render queue.
+	 * Removes gameobjects from the active pool if they are marked for removal.
+	 * Adds new gameobjects.
+	 * Adds dead objects to render queue.
+	 * Respawns the player if necessary.
+	 */
+	private void updateLoop() {
+<span class="nc" id="L415">		List&lt;GameObject&gt; toRemove = new ArrayList&lt;GameObject&gt;();</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">		for (GameObject gObject : gameObjects) {	//Go through every game object</span>
+<span class="nc" id="L417">			gObject.update();						//Update the game object</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">			if (gObject.isRemove()) {				//Check if game object is to be removed</span>
+<span class="nc" id="L419">				toRemove.add(gObject);					//Set it to be removed</span>
+			}else {
+<span class="nc" id="L421">				objectsToRender.add(gObject);</span>
+			}
+<span class="nc" id="L423">		}</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">		for (GameObject rObject : toRemove) {	//Remove game objects set for removal</span>
+<span class="nc" id="L425">			gameObjects.remove(rObject);</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">			if (rObject.isDisplayable()) {</span>
+<span class="nc" id="L427">				deadObjects.add(rObject);</span>
+			}
+<span class="nc" id="L429">		}</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">		for (GameObject aObject : objectsToAdd) {		//Add game objects to be added</span>
+<span class="nc" id="L431">			gameObjects.add(aObject);</span>
+<span class="nc" id="L432">		}</span>
+
+<span class="nc" id="L434">		objectsToAdd.clear();	// Clears list as not to add new objects twice</span>
+
+<span class="nc bnc" id="L436" title="All 2 branches missed.">		for (GameObject dObject : deadObjects) { // loops through the destroyed but displayed items (such as destroyed bases)</span>
+<span class="nc" id="L437">			objectsToRender.add(dObject);</span>
+<span class="nc" id="L438">		}</span>
+		// TRUCK_SELECT_CHANGE_15 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+		// Changed to check if the active truck is destroyed and then updates lives if so
+<span class="nc bnc" id="L441" title="All 2 branches missed.">		if (players.get(activeTruck).isRemove()) {	//If the player is set for removal, respawn</span>
+<span class="nc" id="L442">			updateLives();</span>
+		}
+		// TRUCK_SELECT_CHANGE_15 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+
+<span class="nc" id="L446">	}</span>
+
+	/**
+	 * Renders the objects in &quot;objectsToRender&quot; then clears the list
+	 */
+	private void renderObjects() {
+<span class="nc bnc" id="L452" title="All 2 branches missed.">		for (GameObject object : objectsToRender) {</span>
+<span class="nc" id="L453">			object.render(game.batch);</span>
+<span class="nc" id="L454">		}</span>
+<span class="nc" id="L455">		objectsToRender.clear();</span>
+<span class="nc" id="L456">	}</span>
+
+	/**
+	 * Add a game object next frame
+	 * @param gameObject gameObject to be added
+	 */
+	public void addGameObject(GameObject gameObject) {
+<span class="nc" id="L463">		objectsToAdd.add(gameObject);</span>
+<span class="nc" id="L464">	}</span>
+
+	/**
+	 * Allows external classes to access the player
+	 * @return player
+	 */
+	// TRUCK_SELECT_CHANGE_16 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// Updated to return the active truck
+	public FireTruck getPlayer() {
+<span class="nc" id="L473">		return players.get(activeTruck);</span>
+	}
+	// TRUCK_SELECT_CHANGE_16 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+
+	/**
+	 * Draws the map's background as a texture in the bottom left corner.
+	 * And also redraws all the objects in gameObjects scaled down to fit on the minimap.
+	 * The firetrucks in their relative postions are also drawn on the minimap texture.
+	 *
+	 * @author Bethany Gilmore - NP STUDIOS
+	 */
+	public void drawMinimap(){
+<span class="nc" id="L485">		game.batch.begin();</span>
+<span class="nc" id="L486">		game.batch.draw(minimap, 0, 0, 394, 350);</span>
+
+<span class="nc bnc" id="L488" title="All 2 branches missed.">		for (GameObject object : gameObjects){</span>
+<span class="nc" id="L489">			game.batch.draw(object.getTexture(), object.getX()/19, object.getY()/19, object.getWidth()/10,</span>
+<span class="nc" id="L490">					object.getHeight()/10);</span>
+<span class="nc" id="L491">		} // Draws the fortresses and patrols to a minimap scaled down to the in the bottom left corner.</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">		for (FireTruck truck : players) {</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">			if (truck.getHealthPoints() &gt; 0) {</span>
+<span class="nc" id="L494">				game.batch.draw(truck.getTexture(), truck.getX() / 19, truck.getY() / 19, 20, 25);</span>
+			}
+			//Draws the firetrucks on their relative position on the minimap. size is not to scale to make their position obvious and clear.
+<span class="nc" id="L497">		}</span>
+
+<span class="nc" id="L499">		game.batch.end();</span>
+<span class="nc" id="L500">	}</span>
+	/**
+	 * Draws all debug objects for one frame
+	 */
+	private void DrawDebug() {
+<span class="nc bnc" id="L505" title="All 2 branches missed.">		for (DebugDraw dObject : debugObjects) {</span>
+<span class="nc" id="L506">			dObject.Draw(gamecam.combined);</span>
+<span class="nc" id="L507">		}</span>
+<span class="nc" id="L508">		debugObjects.clear();</span>
+<span class="nc" id="L509">	}</span>
+
+	/**
+	 * Draw a debug line
+	 * @param start Start of the line
+	 * @param end End of the line
+	 * @param lineWidth Width of the line
+	 * @param colour Colour of the line
+	 */
+	public void DrawLine(Vector2 start, Vector2 end, int lineWidth, Color colour) {
+		// MEMORY LEAK FIX 2 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		// Added an if statement to fully ensure debugging view is requested as we noticed the original teams debug
+		// code causes a memory leak and possibly crashes the game overtime.
+<span class="nc bnc" id="L522" title="All 2 branches missed.">		if (showDebug) {</span>
+<span class="nc" id="L523">		debugObjects.add(new DebugLine(start, end, lineWidth, colour));</span>
+		}
+		// END OF MODIFICATION - NP STUDIOS -----------------------------------------
+<span class="nc" id="L526">	}</span>
+
+	/**
+	 * Draw a debug circle (outline)
+	 * @param position Centre of the circle
+	 * @param radius Radius of the circle
+	 * @param lineWidth Width of the outline
+	 * @param colour Colour of the line
+	 */
+	public void DrawCircle(Vector2 position, float radius, int lineWidth, Color colour) {
+		// MEMORY LEAK FIX 3 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		// Added an if statement to fully ensure debugging view is requested as we noticed the original teams debug
+		// code causes a memory leak and possibly crashes the game overtime.
+<span class="nc bnc" id="L539" title="All 2 branches missed.">		if (showDebug) {</span>
+<span class="nc" id="L540">			debugObjects.add(new DebugCircle(position, radius, lineWidth, colour));</span>
+		}
+		// END OF MODIFICATION - NP STUDIOS -----------------------------------------
+<span class="nc" id="L543">	}</span>
+
+	/**
+	 * Draw a debug rectangle (outline)
+	 * @param bottomLeft Bottom left point of the rectangle
+	 * @param dimensions Dimensions of the rectangle (Width, Length)
+	 * @param lineWidth Width of the outline
+	 * @param colour Colour of the line
+	 */
+	public void DrawRect(Vector2 bottomLeft, Vector2 dimensions, int lineWidth, Color colour) {
+		// MEMORY LEAK FIX 4 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		// Added an if statement to fully ensure debugging view is requested as we noticed the original teams debug
+		// code causes a memory leak and possibly crashes the game overtime.
+<span class="nc bnc" id="L556" title="All 2 branches missed.">		if (showDebug) {</span>
+<span class="nc" id="L557">			debugObjects.add(new DebugRect(bottomLeft, dimensions, lineWidth, colour));</span>
+		}
+		// END OF MODIFICATION - NP STUDIOS -----------------------------------------
+<span class="nc" id="L560">	}</span>
+
+	/**
+	 * Updates the position of the camera to have the truck centre
+	 */
+	public void updateCamera() {
+		// TRUCK_SELECT_CHANGE_16 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+		// sets the new camera position based on the current position of the active truck
+<span class="nc" id="L568">		gamecam.position.lerp(new Vector3(players.get(activeTruck).getX(),players.get(activeTruck).getY(),gamecam.position.z),0.2f);// sets the new camera position based on the current position of the FireTruck</span>
+		// TRUCK_SELECT_CHANGE_16 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+<span class="nc" id="L570">		gamecam.update();</span>
+<span class="nc" id="L571">	}</span>
+
+	@Override
+	public void resize(int width, int height) {
+<span class="nc" id="L575">		gameport.update(width, height);</span>
+<span class="nc" id="L576">	}</span>
+
+	@Override
+	public void pause() {
+<span class="nc" id="L580">		setGameState(GameScreenState.PAUSE);</span>
+<span class="nc" id="L581">	}</span>
+
+	@Override
+	public void resume() {
+<span class="nc" id="L585">		setGameState(GameScreenState.RESUME);</span>
+<span class="nc" id="L586">	}</span>
+
+	@Override
+<span class="nc" id="L589">	public void hide() {}</span>
+
+	@Override
+	public void dispose() {
+<span class="nc" id="L593">		Kroy.mainGameScreen = null;</span>
+<span class="nc" id="L594">	}</span>
+
+	public void setGameState(GameScreenState s){
+<span class="nc" id="L597">	    state = s;</span>
+<span class="nc" id="L598">	}</span>
+
+	public List&lt;GameObject&gt; getGameObjects(){
+<span class="nc" id="L601">		return gameObjects;</span>
+	}
+
+	public int getLives() {
+<span class="nc" id="L605">		return lives;</span>
+	}
+
+	/**
+	 * Checks the pause buttons for input
+	 */
+	private void clickCheck() {
+		//resume button
+<span class="nc" id="L613">		pauseWindow.resume.addListener(new ClickListener() {</span>
+	    	@Override
+	    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L616">	    		pauseWindow.visibility(false);</span>
+<span class="nc" id="L617">				resume();</span>
+<span class="nc" id="L618">	    	}</span>
+	    });
+
+		//exit button
+<span class="nc" id="L622">		pauseWindow.exit.addListener(new ClickListener() {</span>
+	    	@Override
+	    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L625">	    		Gdx.app.exit();</span>
+<span class="nc" id="L626">	    	}</span>
+	    });
+		//menu button
+<span class="nc" id="L629">		pauseWindow.menu.addListener(new ClickListener() {</span>
+	    	@Override
+	    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L632">	    		dispose();</span>
+<span class="nc" id="L633">	    		game.backToMenu();</span>
+<span class="nc" id="L634">	    		return;</span>
+	    	}
+	    });
+<span class="nc" id="L637">	}</span>
+
+	/**
+	 * Remove one fortress to the fortressCount
+	 */
+	public void removeFortress() {
+<span class="nc" id="L643">		fortressesCount--;</span>
+<span class="nc" id="L644">	}</span>
+
+	/**
+	 * How many fortresses are left?
+	 * @return Number of fortresses remaining
+	 */
+	// FORTRESS_COUNT_3 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+	// Edited the name of the getter to improve consistency
+	public int getFortressesCount() {
+<span class="nc" id="L653">		return fortressesCount;</span>
+	}
+	// FORTRESS_COUNT_3 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT
+
+	/**
+	 * Switch to the game over screen
+	 * @param won Did the player reach the win state?
+	 */
+	public void gameOver(boolean won) {
+<span class="nc" id="L662">		GameOverScreen gameOverScreen = new GameOverScreen(game, activeTruck, won);</span>
+<span class="nc" id="L663">		gameOverScreen.setDifficulty(gameDifficulty);</span>
+<span class="nc" id="L664">		game.setScreen(gameOverScreen);</span>
+<span class="nc" id="L665">	}</span>
+
+	/**
+	 * Calls game over if lives == 0, otherwise removes 1 from life counter
+	 */
+	public void updateLives() {
+<span class="nc bnc" id="L671" title="All 2 branches missed.">		if (lives&gt;1) {</span>
+<span class="nc" id="L672">			lives -= 1;</span>
+<span class="nc" id="L673">			respawn();</span>
+		} else {
+<span class="nc" id="L675">			gameOver(false);</span>
+		}
+
+<span class="nc" id="L678">	}</span>
+
+	/**
+	 * Respawns the player at the spawn position and updates the HUD
+	 */
+	public void respawn() {
+		// TRUCK_SELECT_CHANGE_17 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+		// Picks first alive truck and sets this to the new active one when the current active one is killed
+<span class="nc bnc" id="L686" title="All 2 branches missed.">		for (int i = 0; i &lt; players.size(); i++) {</span>
+<span class="nc bnc" id="L687" title="All 2 branches missed.">			if (players.get(i).isRemove() == false) {</span>
+<span class="nc" id="L688">				activeTruck = i;</span>
+<span class="nc" id="L689">				break;</span>
+			}
+		}
+		// TRUCK_SELECT_CHANGE_17 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+<span class="nc" id="L693">	}</span>
+	public HUD getHud(){
+<span class="nc" id="L695">		return hud;</span>
+	}
+
+	public Vector2 getSpawnPosition() {
+<span class="nc" id="L699">		return spawnPosition;</span>
+	}
+
+
+	// TRUCK_SELECT_CHANGE_18 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// Sets the selected variable on each of the trucks to false and then sets the active trucks selected variable to true
+	public void selectTruck() {
+<span class="nc bnc" id="L706" title="All 2 branches missed.">		for (FireTruck truck : players) {</span>
+<span class="nc" id="L707">			truck.setSelected(false);</span>
+<span class="nc" id="L708">		}</span>
+<span class="nc" id="L709">		players.get(activeTruck).setSelected(true);</span>
+<span class="nc" id="L710">	}</span>
+	// TRUCK_SELECT_CHANGE_18 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+
+	public void setDifficulty(int newDifficulty) {
+<span class="nc" id="L714">		gameDifficulty = newDifficulty;</span>
+<span class="nc" id="L715">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

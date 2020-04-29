@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MenuScreen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.screens</a> &gt; <span class="el_source">MenuScreen.java</span></div><h1>MenuScreen.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.screens;
+  
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dicycat.kroy.Kroy;
+import com.dicycat.kroy.misc.Button;
+import com.dicycat.kroy.scenes.*;
+import com.dicycat.kroy.minigame.Minigame;
+
+/**
+ * Main Menu screen
+ * 
+ * @author Michele Imbriani
+ *
+ */
+public class MenuScreen implements Screen{
+  
+  private Kroy game; 
+  private OrthographicCamera gamecam;	//m
+  private Viewport gameport; 	//m
+  private Texture background,
+// REFACTOR_CHANGE_1 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER ---
+  // renamed these variables to have a 'Texture' suffix as it is more conventional as these variables are no button objects
+  // later on in this class, 'playButton' button instance can be seen for example and deserves this name more
+    playButtonTexture,
+  	playButtonActiveTexture,
+  	optionsButtonTexture,
+    difficultyButtonTexture,
+	difficultyButtonActiveTexture,
+  	optionsButtonActiveTexture,
+  	exitButtonTexture,
+  	exitButtonActiveTexture,
+  	minigameButtonTexture,
+  	minigameButtonActiveTexture,
+// REFACTOR_CHANGE_1 - END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER -----
+
+
+	// CONTROL_SCREEN_1 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER ---
+	// added the controls screen and need the button textures to be stored in these variables
+  	controlsButtonTexture,
+  	controlsButtonActiveTexture;
+	// CONTROL_SCREEN_1 - END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER -----
+  
+  private Stage stage;
+  
+  private OptionsWindow optionsWindow;
+
+  private Minigame minigame;
+  private DifficultyWindowNew difficultyWindowNew;
+
+<span class="nc" id="L63">  private int gameDifficulty = 1;</span>
+
+  // CONTROL_SCREEN_ 2 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+  	// creating an instance of the ControlsWindow class
+  private ControlsWindow controlsWindow; 
+  // CONTROL_SCREEN_2 - END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+
+  
+<span class="nc" id="L71">  public static Music music = Gdx.audio.newMusic(Gdx.files.internal(&quot;gamemusic.mp3&quot;));</span>
+<span class="nc" id="L72">  public static float musicVolume = 0.4f;</span>
+
+  //coordinates for Play and Exit buttons 
+<span class="nc" id="L75">  private int buttonWidth = 250;</span>
+<span class="nc" id="L76">  private int buttonHeight = 50;</span>
+<span class="nc" id="L77">  private int xAxisCentred = (Kroy.width/2) - (buttonWidth/2);</span>
+<span class="nc" id="L78">  private int playButtonY = (Kroy.height/2)+60; //new game button actually</span>
+<span class="nc" id="L79">  private int optionsButtonY = (Kroy.height/2);</span>
+<span class="nc" id="L80">  private int minigameButtonY = (Kroy.height/2)-60;</span>
+<span class="nc" id="L81">  private int controlsButtonY = (Kroy.height/2)-120;</span>
+<span class="nc" id="L82">  private int difficultyButtonY = (Kroy.height/2)-180;</span>
+
+  // CONTROL_SCREEN_3 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+  	// assigning this variable the y coordinate for where the controlsButton button instance will be placed on the main menu
+
+  // CONTROL_SCREEN_3 END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+<span class="nc" id="L88">  private int exitButtonY = (Kroy.height/2)-240;</span>
+  
+<span class="nc" id="L90">  private Pixmap pm = new Pixmap(Gdx.files.internal(&quot;handHD2.png&quot;)); //cursor</span>
+<span class="nc" id="L91">  private int xHotSpot = pm.getWidth() / 3;	//where the cursor's aim is </span>
+<span class="nc" id="L92">  private int yHotSpot = 0;</span>
+  
+  private FireTruckSelectionScene fireTruckSelector;
+<span class="nc" id="L95">  private boolean currentlyRunningGame = false;</span>
+
+  /**
+   *  Used to define the current state of the screen, 
+   *  MAINMENU is used mostly but then TRUCKSELECT used when the &quot;NewGame&quot; button has been pressed
+   */
+<span class="nc" id="L101">  public static enum MenuScreenState {</span>
+<span class="nc" id="L102">	  MAINMENU,</span>
+<span class="nc" id="L103">	  TRUCKSELECT,</span>
+<span class="nc" id="L104">	  OPTIONS,</span>
+<span class="nc" id="L105">	  MINIGAME,</span>
+	  // CONTROL_SCREEN_4 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+<span class="nc" id="L107">	  CONTROLS, // adding a new window state, the controls window, has the code that calls the creation and setup of the controls window</span>
+	  // CONTROL_SCREEN_4 - END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+<span class="nc" id="L109">	  DIFFICULTY</span>
+  }
+  
+<span class="nc" id="L112">  public MenuScreenState state = MenuScreenState.MAINMENU;</span>
+
+<span class="nc" id="L114">  public MenuScreen(Kroy game) { </span>
+<span class="nc" id="L115">	  this.game = game; </span>
+<span class="nc" id="L116">	  exitButtonTexture = new Texture(&quot;EXIT.png&quot;); 	//in later stages we could also have buttonActive and buttonInactive</span>
+<span class="nc" id="L117">	  exitButtonActiveTexture = new Texture(&quot;exitActive.png&quot;);</span>
+<span class="nc" id="L118">	  optionsButtonTexture = new Texture(&quot;options.png&quot;);</span>
+<span class="nc" id="L119">	  optionsButtonActiveTexture = new Texture(&quot;optionsActive.png&quot;);</span>
+<span class="nc" id="L120">	  playButtonTexture = new Texture(&quot;newgame.png&quot;);</span>
+<span class="nc" id="L121">	  playButtonActiveTexture = new Texture(&quot;newActive.png&quot;);</span>
+<span class="nc" id="L122">	  minigameButtonTexture = new Texture(&quot;minigame.png&quot;);</span>
+<span class="nc" id="L123">	  minigameButtonActiveTexture = new Texture(&quot;minigameActive.png&quot;);</span>
+	  //NEW
+<span class="nc" id="L125">	  difficultyButtonTexture = new Texture(&quot;difficulty.png&quot;);</span>
+<span class="nc" id="L126">	  difficultyButtonActiveTexture = new Texture(&quot;difficultyActive.png&quot;);</span>
+
+	// CONTROL_SCREEN_5 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+<span class="nc" id="L129">	  controlsButtonTexture = new Texture(&quot;controls.png&quot;); // control button texture</span>
+<span class="nc" id="L130">	  controlsButtonActiveTexture = new Texture(&quot;controls_ACTIVE.png&quot;); // control button texture when the mouse is hovering over the button</span>
+	// CONTROL_SCREEN_5 - END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+
+<span class="nc" id="L133">	  background = new Texture (&quot;fireforce.jpg&quot;);</span>
+	  
+<span class="nc" id="L135">	  gamecam = new OrthographicCamera();    //m</span>
+<span class="nc" id="L136">	  gameport = new FitViewport(Kroy.width, Kroy.height, gamecam);</span>
+<span class="nc" id="L137">	  stage = new Stage(gameport);</span>
+	  
+<span class="nc" id="L139">	  fireTruckSelector = new FireTruckSelectionScene(game);</span>
+<span class="nc" id="L140">	  fireTruckSelector.visibility(false);</span>
+	  
+<span class="nc" id="L142">	  music.play();</span>
+<span class="nc" id="L143">	  music.setLooping(true);  </span>
+<span class="nc" id="L144">	  music.setVolume((float)musicVolume);  </span>
+	  
+<span class="nc" id="L146">	  optionsWindow = new OptionsWindow(game);</span>
+<span class="nc" id="L147">	  optionsWindow.visibility(false);</span>
+
+<span class="nc" id="L149">	  minigame = new Minigame(game, false);</span>
+<span class="nc" id="L150">	  minigame.visibility(false);</span>
+	  
+<span class="nc" id="L152">	  controlsWindow = new ControlsWindow(game);</span>
+<span class="nc" id="L153">	  controlsWindow.visibility(false);</span>
+
+<span class="nc" id="L155">	  difficultyWindowNew = new DifficultyWindowNew(game);</span>
+<span class="nc" id="L156">	  difficultyWindowNew.visibility(false);</span>
+
+
+
+
+<span class="nc" id="L161">  }</span>
+  
+  @Override 
+<span class="nc" id="L164">  public void show() {}</span>
+  
+  /**
+   *	Enum allows to make the MenuScreen behave differently depending 
+   *	on whether it's in mainMenu, Options or fireTruckSelection
+   */
+  @Override 
+  public void render(float delta) { 
+	  
+<span class="nc bnc" id="L173" title="All 7 branches missed.">	  switch(state) {</span>
+		  case MAINMENU:	// Display all buttons and the main menu		  
+<span class="nc" id="L175">			  stage.act();	//allows the stage to interact with user input</span>
+			  
+<span class="nc" id="L177">			  game.batch.setProjectionMatrix(gamecam.combined);</span>
+<span class="nc" id="L178">			  game.batch.begin();</span>
+			  
+<span class="nc" id="L180">			  Gdx.graphics.setCursor(Gdx.graphics.newCursor(pm, xHotSpot, yHotSpot));</span>
+<span class="nc" id="L181">			  game.batch.draw(background, 0, 0);</span>
+			 
+<span class="nc" id="L183">			  game.batch.draw(minigameButtonTexture, xAxisCentred, minigameButtonY, buttonWidth, buttonHeight);</span>
+			
+			
+			  // REFACTOR_CHANGE_2 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER ------------------------------------------------------------------
+			  
+				// In this refactor, the format of the buttons has been changed to be more readable and easier to use.
+				// To create a button you create a Button object and pass the constructor its y coordinate, image,
+				// an on-hover image and the game instance that the button exists in.
+				// The following if statements check if the button has been clicked and execute the necessary code if so
+			  
+			  //for play button: checks if the position of the cursor is inside the coordinates of the button
+<span class="nc" id="L194">			  Button playButton = new Button(playButtonY, playButtonTexture, playButtonActiveTexture, game);</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">			  if (playButton.buttonAction()) {</span>
+<span class="nc" id="L196">				  this.dispose();</span>
+<span class="nc" id="L197">				  game.batch.end();</span>
+<span class="nc" id="L198">				  fireTruckSelector.visibility(true);// display the truck selection window</span>
+<span class="nc" id="L199">				  setGameState(MenuScreenState.TRUCKSELECT);// set the game state to run and run the selection screen code</span>
+<span class="nc" id="L200">				  return;</span>
+			  }
+			  
+			  
+			  //for exit button
+			  		// button created
+<span class="nc" id="L206">			  Button test_exitButton = new Button(exitButtonY, exitButtonTexture, exitButtonActiveTexture, game);</span>
+			  		// if the button is pressed, execute the command inside the if statement
+<span class="nc bnc" id="L208" title="All 2 branches missed.">			  if (test_exitButton.buttonAction()) {</span>
+<span class="nc" id="L209">				  Gdx.app.exit();</span>
+			  }
+
+			  // MINIGAME_IMPLEMENTATION_1 - START OF MODIFICATION - NP STUDIOS - BETHANY GILMORE
+<span class="nc" id="L213">			  Button minigameButton = new Button(minigameButtonY, minigameButtonTexture, minigameButtonActiveTexture, game);</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">			  if (minigameButton.buttonAction()) {</span>
+<span class="nc" id="L215">				  minigame.visibility(true);</span>
+<span class="nc" id="L216">				  setGameState(MenuScreenState.MINIGAME);</span>
+			  // MINIGAME_IMPLEMENTATION_1 - END OF MODIFICATION - NP STUDIOS - BETHANY GILMORE
+			  }
+			  
+			  //for options button
+<span class="nc" id="L221">			  Button optionsButton = new Button(optionsButtonY, optionsButtonTexture, optionsButtonActiveTexture, game);</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			  if (optionsButton.buttonAction()) {</span>
+				//game.batch.end();
+<span class="nc" id="L224">				  optionsWindow.visibility(true);</span>
+<span class="nc" id="L225">				  setGameState(MenuScreenState.OPTIONS);</span>
+			  }
+
+<span class="nc" id="L228">			  Button difficultyButton = new Button(difficultyButtonY, difficultyButtonTexture, difficultyButtonActiveTexture, game);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">			  if (difficultyButton.buttonAction()){</span>
+<span class="nc" id="L230">			  	difficultyWindowNew.visibility(true);</span>
+<span class="nc" id="L231">			  	setGameState(MenuScreenState.DIFFICULTY);</span>
+		  }
+			  
+			  // REFACTOR_CHANGE_2 - END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER --------------------------------------------------------------------
+			 
+			  
+			  // CONTROL_SCREEN_6 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+			  // for controls button
+			  
+			  // added a button to click, to direct the user to the controls window if clicked
+			  
+<span class="nc" id="L242">			  Button controlsButton = new Button(controlsButtonY, controlsButtonTexture, controlsButtonActiveTexture, game);</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">			  if (controlsButton.buttonAction()) {</span>
+<span class="nc" id="L244">				  controlsWindow.visibility(true);</span>
+<span class="nc" id="L245">				  setGameState(MenuScreenState.CONTROLS);</span>
+			  }
+			 
+			  // CONTROL_SCREEN_6 - END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER
+			  
+<span class="nc" id="L250">			  game.batch.end();</span>
+				  
+<span class="nc" id="L252">			  break;</span>
+		  case TRUCKSELECT: // Ran when the new game button pressed
+<span class="nc" id="L254">			  Gdx.input.setInputProcessor(fireTruckSelector.stage);</span>
+<span class="nc" id="L255">			  fireTruckSelector.stage.act();</span>
+<span class="nc" id="L256">			  fireTruckSelector.stage.draw();</span>
+<span class="nc" id="L257">			  clickCheck();//Checks for any button presses</span>
+<span class="nc" id="L258">			  break;</span>
+		  case OPTIONS:
+<span class="nc" id="L260">			  Gdx.input.setInputProcessor(optionsWindow.stage);</span>
+<span class="nc" id="L261">			  optionsWindow.stage.act();</span>
+<span class="nc" id="L262">			  optionsWindow.stage.draw();</span>
+<span class="nc" id="L263">			  optionsWindow.clickCheck(true);</span>
+<span class="nc" id="L264">			  break;</span>
+		  // MINIGAME_IMPLEMENTATION_2 - START OF MODIFICATION - NP STUDIOS - BETHANY GILMORE
+		  case MINIGAME:
+<span class="nc" id="L267">		  	  Gdx.input.setInputProcessor(minigame.stage);</span>
+<span class="nc" id="L268">		  	  minigame.stage.act();</span>
+<span class="nc" id="L269">		  	  minigame.stage.draw();</span>
+<span class="nc" id="L270">		  	  minigame.clickCheck();</span>
+<span class="nc" id="L271">		  	  break;</span>
+		  // MINIGAME_IMPLEMENTATION_2 - END OF MODIFICATION - NP STUDIOS - BETHANY GILMORE
+
+		  // CONTROL_SCREEN_7 - START OF MODIFICATION - NP STUDIOS - JORDAN SPOONER ------------------------------------------------------------------
+			  // CONTROLS switch statement added to set up the controls window
+		  case CONTROLS: 
+<span class="nc" id="L277">		  	  Gdx.input.setInputProcessor(controlsWindow.stage); // set inputs from the user only valid to the controlsWindow</span>
+<span class="nc" id="L278">		  	  controlsWindow.stage.act();</span>
+<span class="nc" id="L279">		  	  controlsWindow.stage.draw(); // draw the window</span>
+<span class="nc" id="L280">		  	  controlsWindow.clickCheck(); // constantly check for user inputs from the mouse</span>
+<span class="nc" id="L281">		  	  break;</span>
+		  // CONTROL_SCREEN_7 - END OF MODIFICATION - NP STUDIOS - JORDAN SPOONER --------------------------------------------------------------------
+		  case DIFFICULTY:
+<span class="nc" id="L284">			  Gdx.input.setInputProcessor(difficultyWindowNew.stage); // set inputs from the user only valid to the difficultyWindow</span>
+<span class="nc" id="L285">			  difficultyWindowNew.stage.act();</span>
+<span class="nc" id="L286">			  difficultyWindowNew.stage.draw(); // draw the window</span>
+<span class="nc" id="L287">			  difficultyWindowNew.clickCheck(true);</span>
+			  break;
+
+		  }
+
+<span class="nc" id="L292">  	}</span>
+
+	public void setGameState(MenuScreenState state){
+<span class="nc" id="L295">	    this.state = state;</span>
+<span class="nc" id="L296">	}</span>
+  
+	/**
+	 * Checks if any of the buttons have been pressed
+	 * and the number of the fireTruck type is passed to the new GameScreen
+	 */
+	public void clickCheck() {
+		// TRUCK_SELECT_CHANGE_19 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+		// Start Game Button click event
+<span class="nc" id="L305">		fireTruckSelector.startGameButton.addListener(new ClickListener() {</span>
+			@Override
+	    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L308">				startGame();// Starts game</span>
+<span class="nc" id="L309">	    	}</span>
+	    });
+
+		// Deleted click check events for the buttons which used to be used to select the firetruck you wanted.
+
+		// TRUCK_SELECT_CHANGE_19 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+<span class="nc" id="L315">	}</span>
+
+	public void setDifficulty(int newDifficulty) {
+<span class="nc" id="L318">		gameDifficulty = newDifficulty;</span>
+<span class="nc" id="L319">	}</span>
+
+
+	/**
+	 * If the game isn't currently running, creates a new game
+ 	 */
+	// TRUCK_SELECT_CHANGE_20 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+	// Removed unused parameters which were modified elsewhere
+	public void startGame() {
+<span class="nc bnc" id="L328" title="All 2 branches missed.">		 if (!currentlyRunningGame) {	// Checks if a new GameScren is currently running and either makes one or ignores the commands</span>
+<span class="nc" id="L329">			 currentlyRunningGame = true; // Makes sure that only one GameScreen is opened at once</span>
+<span class="nc" id="L330">			 game.newGame(gameDifficulty); // Calls the function in Kroy to start a new game</span>
+		 }
+<span class="nc" id="L332">	}</span>
+	// TRUCK_SELECT_CHANGE_20 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+
+  public void setCurrentlyRunningGame(boolean state) {
+<span class="nc" id="L336">	  currentlyRunningGame = state;</span>
+<span class="nc" id="L337">  }</span>
+
+  @Override 
+  public void resize(int width, int height) {
+<span class="nc" id="L341">	  gameport.update(width, height);</span>
+<span class="nc" id="L342">  }</span>
+  
+  @Override 
+<span class="nc" id="L345">  public void pause() {}</span>
+  
+  @Override 
+<span class="nc" id="L348">  public void resume() {}</span>
+  
+  @Override 
+<span class="nc" id="L351">  public void hide() {}</span>
+  
+  @Override 
+<span class="nc" id="L354">  public void dispose() {}</span>
+  
+ }
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Alien.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.entities</a> &gt; <span class="el_source">Alien.java</span></div><h1>Alien.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.entities;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.Vector2;
+import com.dicycat.kroy.Kroy;
+import com.dicycat.kroy.bullets.Bullet;
+import com.dicycat.kroy.bullets.BulletDispenser;
+import com.dicycat.kroy.bullets.Pattern;
+
+import java.util.Random;
+
+/**
+ * A mobile Alien which follows a predefined patrol coordinate path and will stop and attack
+ * the player if the player is within range.
+ * 
+ * @author Lucy Ivatt
+ */
+public class Alien extends Entity {
+
+	BulletDispenser dispenser;
+	int speed;
+
+	private Vector2[] waypoints; // The waypoints that the alien will follow
+	private int currentWaypoint; // The waypoint index the alien is currently at
+	private float movementCountdown; // Delays first movement of the alien, stops them from overlapping at beginning.
+	private int patrolNumber;
+	private float initialMovementCountdown;
+
+	public Alien(int patrolNumber, float movementCountdown, int radius, int entityDifficulty) {
+		// Edited Entity constructor to include radius so that alien radius can be changed.
+<span class="nc" id="L30">		super(new Vector2(0, 0), Kroy.mainGameScreen.textures.getUFO(),</span>
+				new Vector2(80, 80), 500, radius, entityDifficulty);
+
+		// Sets waypoints variable to be equal to the right array of pre-defined coordinates.
+<span class="nc bnc" id="L34" title="All 2 branches missed.">		if (patrolNumber == 1) {</span>
+<span class="nc" id="L35">			waypoints = new Vector2[]{new Vector2(268 * 16, (400 - 254) * 16), new Vector2(344 * 16, (400 - 254) * 16),</span>
+					new Vector2(344 * 16, (400 - 310) * 16), new Vector2(246 * 16, (400 - 310) * 16),
+					new Vector2(246 * 16, (400 - 279) * 16), new Vector2(268 * 16, (400 - 279) * 16)};
+		}
+<span class="nc bnc" id="L39" title="All 2 branches missed.">		else if (patrolNumber == 2) {</span>
+<span class="nc" id="L40">			waypoints = new Vector2[]{new Vector2(101 * 16, (400 - 232) * 16), new Vector2(190 * 16, (400 - 232) * 16),</span>
+					new Vector2(190 * 16, (400 - 279) * 16), new Vector2(179 * 16, (400 - 279) * 16),
+					new Vector2(179 * 16, (400 - 363) * 16), new Vector2(101 * 16, (400 - 362) * 16)};
+		}
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		else if (patrolNumber == 3) {</span>
+<span class="nc" id="L46">			waypoints = new Vector2[]{new Vector2(211 * 16, (400 - 84) * 16), new Vector2(255 * 16, (400 - 84) * 16),</span>
+					new Vector2(255 * 16, (400 - 106) * 16), new Vector2(212 * 16, (400 - 106) * 16)};
+		}
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">		else if (patrolNumber == 4) {</span>
+<span class="nc" id="L51">			waypoints = new Vector2[]{new Vector2(111 * 16, (400 - 110) * 16), new Vector2(111 * 16, (400 - 157) * 16),</span>
+					new Vector2(120 * 16, (400 - 157) * 16), new Vector2(120 * 16, (400 - 176) * 16),
+					new Vector2(91 * 16, (400 - 176) * 16), new Vector2(91 * 16, (400 - 138) * 16),
+					new Vector2(49 * 16, (400 - 138) * 16), new Vector2(49 * 16, (400 - 110) * 16)};
+		}
+<span class="nc" id="L56">		this.patrolNumber = patrolNumber;</span>
+<span class="nc" id="L57">		this.initialMovementCountdown = movementCountdown;</span>
+<span class="nc" id="L58">		setPosition(waypoints[0]); // Sets the starting position of the alien to the first waypoint</span>
+<span class="nc" id="L59">		dispenser = new BulletDispenser(this); // Initialises the bullet dispenser</span>
+<span class="nc" id="L60">		Random random = new Random(); // Creates instance of Random class to give Aliens random damage.</span>
+<span class="nc" id="L61">		dispenser.addPattern(new Pattern(180, 300, 800, 0.1f, 20,</span>
+<span class="nc" id="L62">				1, 0.5f, random.nextInt((20 - 5) + 1) + 5, entityDifficulty));  // Adds pattern and random</span>
+																							// damage to the bullet dispenser.
+<span class="nc" id="L64">		currentWaypoint = 0; // Sets current waypoint as the first waypoint in the array.</span>
+<span class="nc" id="L65">		this.movementCountdown = movementCountdown;</span>
+<span class="nc" id="L66">		speed = 150;</span>
+<span class="nc" id="L67">	}</span>
+
+	/**
+	 * Called to update the Alien every game tick. Moves the alien around its patrol path.
+	 * If a player is in range, shoots projectiles at the player.
+	 */
+	@Override
+	public void update() {
+<span class="nc" id="L75">		movementCountdown -= 1; // Decrements movement Countdown</span>
+
+		// If the countdown is over, the moves the alien.
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		if(movementCountdown &lt; 0) {</span>
+<span class="nc" id="L79">				nextWayPoint();</span>
+<span class="nc" id="L80">				setPosition(new Vector2(moveAlongPatrol(waypoints[currentWaypoint])));</span>
+		}
+
+		// If player in radius then shoots bullets towards them
+<span class="nc" id="L84">		Bullet[] toShoot = dispenser.update(playerInRadius());</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">		if (toShoot != null) {</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">			for (Bullet bullet : toShoot) {</span>
+<span class="nc" id="L87">				bullet.fire(getCentre());</span>
+<span class="nc" id="L88">				Kroy.mainGameScreen.addGameObject(bullet);</span>
+			}
+		}
+<span class="nc" id="L91">	}</span>
+
+	/**
+	 * Calculates the position that the alien should be set to next game tick.
+	 * @param destination the coordinate of the next waypoint which is the aliens destination
+	 * @return Vector2 coordinate that the Aliens position will be set to when next updated.
+	 */
+	private Vector2 moveAlongPatrol(Vector2 destination) {
+<span class="nc" id="L99">		Vector2 nextPos = getPosition();</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">		if (getPosition().x == destination.x) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">			if (destination.y &gt; getPosition().y) {</span>
+<span class="nc" id="L102">				nextPos.y += speed * Gdx.graphics.getDeltaTime();</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">				if (nextPos.y &gt; destination.y) {</span>
+<span class="nc" id="L104">					nextPos.y = destination.y;</span>
+				}
+			} else {
+<span class="nc" id="L107">				nextPos.y -= speed * Gdx.graphics.getDeltaTime();</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">				if (nextPos.y &lt; destination.y) {</span>
+<span class="nc" id="L109">					nextPos.y = destination.y;</span>
+				}
+			}
+		} else {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">			if (destination.x &gt; getPosition().x) {</span>
+<span class="nc" id="L114">				nextPos.x += speed * Gdx.graphics.getDeltaTime();</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">				if (nextPos.x &gt; destination.x) {</span>
+<span class="nc" id="L116">					nextPos.x = destination.x;</span>
+				}
+			} else {
+<span class="nc" id="L119">				nextPos.x -= speed * Gdx.graphics.getDeltaTime();</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">				if (nextPos.x &lt; destination.x) {</span>
+<span class="nc" id="L121">					nextPos.x = destination.x;</span>
+				}
+			}
+		}
+<span class="nc" id="L125">		return nextPos;</span>
+	}
+	/**
+	 * Checks if the alien has reached a waypoint and then increments currentWaypoint if so. If it has reached
+	 * the end of the path, sets destination waypoint back to the beginning.
+	 */
+	private void nextWayPoint() {
+<span class="nc bnc" id="L132" title="All 4 branches missed.">		if (getPosition().y == waypoints[currentWaypoint].y &amp;&amp; getPosition().x == waypoints[currentWaypoint].x) {</span>
+<span class="nc" id="L133">			currentWaypoint++;</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">			if (currentWaypoint &gt;= (waypoints.length)) {</span>
+<span class="nc" id="L135">				currentWaypoint = 0;</span>
+			}
+		}
+<span class="nc" id="L138">	}</span>
+
+<span class="nc" id="L140">	public int getPatrolNumber() { return patrolNumber; }</span>
+<span class="nc" id="L141">	public float getInitialMovementCountdown() { return initialMovementCountdown; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

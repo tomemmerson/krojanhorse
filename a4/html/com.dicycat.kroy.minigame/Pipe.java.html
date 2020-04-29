@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Pipe.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.minigame</a> &gt; <span class="el_source">Pipe.java</span></div><h1>Pipe.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.minigame;
+
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import java.util.Random;
+
+/**
+ * A class for the pipes of the minigame. Essentially puzzle pieces.
+ *
+ * @author Bethany Gilmore - NP STUDIOS
+ *
+ */
+public class Pipe {
+    private Texture image;
+    private ImageButton button;
+    private int type;
+    private int rotation;
+    private int correctRotation;
+
+<span class="fc" id="L22">    public Pipe(int type, int correctRotation) {</span>
+<span class="fc" id="L23">        this.correctRotation = correctRotation;</span>
+<span class="fc" id="L24">        this.type = type;</span>
+<span class="fc" id="L25">        Random rand = new Random();</span>
+
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        if (type == 0) {</span>
+<span class="fc" id="L28">            this.rotation = rand.nextInt(2);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">            if (this.rotation == 0) {</span>
+<span class="fc" id="L30">                this.image = new Texture(&quot;pipeI-0.png&quot;);</span>
+            } else {
+<span class="fc" id="L32">                this.image = new Texture(&quot;pipeI-1.png&quot;);</span>
+            }
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        } else if (type == 1) {</span>
+<span class="fc" id="L35">            this.rotation = rand.nextInt(4);</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">            if (this.rotation == 0) {</span>
+<span class="nc" id="L37">                this.image = new Texture(&quot;pipeL-0.png&quot;);</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">            } else if (this.rotation == 1) {</span>
+<span class="nc" id="L39">                this.image = new Texture(&quot;pipeL-1.png&quot;);</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">            } else if (this.rotation == 2) {</span>
+<span class="fc" id="L41">                this.image = new Texture(&quot;pipeL-2.png&quot;);</span>
+            } else {
+<span class="nc" id="L43">                this.image = new Texture(&quot;pipeL-3.png&quot;);</span>
+            }
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        } else if (type == 2) {</span>
+<span class="fc" id="L46">            this.rotation = rand.nextInt(4);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">            if (this.rotation == 0) {</span>
+<span class="nc" id="L48">                this.image = new Texture(&quot;pipeT-0.png&quot;);</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">            } else if (this.rotation == 1) {</span>
+<span class="nc" id="L50">                this.image = new Texture(&quot;pipeT-1.png&quot;);</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">            } else if (this.rotation == 2) {</span>
+<span class="nc" id="L52">                this.image = new Texture(&quot;pipeT-2.png&quot;);</span>
+            } else {
+<span class="fc" id="L54">                this.image = new Texture(&quot;pipeT-3.png&quot;);</span>
+            }
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        } else if (type == 3) {</span>
+<span class="fc" id="L57">            this.image = new Texture(&quot;pipeX.png&quot;);</span>
+<span class="fc" id="L58">            this.rotation = 0;</span>
+        }
+<span class="fc" id="L60">        button = new ImageButton(new TextureRegionDrawable(new TextureRegion(this.image)));</span>
+<span class="fc" id="L61">    }</span>
+
+    public ImageButton getButton() {
+<span class="nc" id="L64">        return this.button;</span>
+    }
+
+    public int getRotation() {
+<span class="fc" id="L68">        return this.rotation;</span>
+    }
+
+    /**
+     * Replaces the image of the pipe with one rotated by 90 degrees And changes the
+     * variable representing the current rotation accordingly
+     */
+    public void rotate() {
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        if (this.type == 0) {</span>
+<span class="fc" id="L77">            this.rotation = (this.rotation + 1) % 2;</span>
+<span class="fc" id="L78">            String file = &quot;pipeI-&quot; + this.rotation + &quot;.png&quot;;</span>
+<span class="fc" id="L79">            this.image = new Texture(file);</span>
+<span class="fc" id="L80">            this.button = new ImageButton(new TextureRegionDrawable(new TextureRegion(this.image)));</span>
+<span class="pc bnc" id="L81" title="All 2 branches missed.">        } else if (this.type == 1) {</span>
+<span class="nc" id="L82">            this.rotation = (this.rotation + 1) % 4;</span>
+<span class="nc" id="L83">            String file = &quot;pipeL-&quot; + this.rotation + &quot;.png&quot;;</span>
+<span class="nc" id="L84">            this.image = new Texture(file);</span>
+<span class="nc" id="L85">            this.button = new ImageButton(new TextureRegionDrawable(new TextureRegion(this.image)));</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        } else if (this.type == 2) {</span>
+<span class="nc" id="L87">            this.rotation = (this.rotation + 1) % 4;</span>
+<span class="nc" id="L88">            String file = &quot;pipeT-&quot; + this.rotation + &quot;.png&quot;;</span>
+<span class="nc" id="L89">            this.image = new Texture(file);</span>
+<span class="nc" id="L90">            this.button = new ImageButton(new TextureRegionDrawable(new TextureRegion(this.image)));</span>
+        }
+<span class="fc" id="L92">    }</span>
+
+    /**
+     * Checks if the orientation of the pipe is correct
+     * 
+     * @return true if correct, otherwise false
+     */
+    public boolean isCorrect() {
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if (this.rotation == this.correctRotation) {</span>
+<span class="fc" id="L101">            System.out.println(&quot;true&quot;);</span>
+<span class="fc" id="L102">            return true;</span>
+        } else {
+<span class="fc" id="L104">            System.out.println(&quot;false&quot;);</span>
+<span class="fc" id="L105">            return false;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Minigame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.minigame</a> &gt; <span class="el_source">Minigame.java</span></div><h1>Minigame.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.minigame;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dicycat.kroy.Kroy;
+import com.dicycat.kroy.screens.GameScreen;
+import com.dicycat.kroy.screens.MenuScreen;
+import java.util.ArrayList;
+import java.util.Random;
+
+/**
+ * A window to display the minigame.
+ *
+ * @author Bethany Gilmore - NP STUDIOS
+ *
+ */
+
+public class Minigame {
+
+    public Stage stage;
+<span class="nc" id="L33">    public Table table = new Table();</span>
+    private SpriteBatch sb;
+    private NinePatch patch;
+    private NinePatchDrawable background;
+    private Skin skin;
+
+<span class="nc" id="L39">    private ArrayList&lt;Pipe&gt; pipes = new ArrayList&lt;&gt;(); //stores all of the pipes, which are each an individual piece of the puzzle.</span>
+    private ImageButton check;
+
+    private TextButton back;
+    private boolean inGame;
+
+    private static Minigame.State state;
+
+    /**
+     *	Allows to have multiple versions of the Minigame without needing to create multiple Stages.
+     */
+<span class="nc" id="L50">    public static enum State{</span>
+<span class="nc" id="L51">        GAME1,</span>
+<span class="nc" id="L52">        GAME2,</span>
+<span class="nc" id="L53">        GAME3,</span>
+<span class="nc" id="L54">        WON,</span>
+    }
+
+<span class="nc" id="L57">    public Minigame(Kroy game, boolean inGame){</span>
+<span class="nc" id="L58">        patch = new NinePatch(new Texture(&quot;loool.jpg&quot;), 3, 3, 3, 3);</span>
+<span class="nc" id="L59">        background = new NinePatchDrawable(patch);</span>
+<span class="nc" id="L60">        skin = new Skin(Gdx.files.internal(&quot;uiskin.json&quot;)); //Allows for text to be written in the table</span>
+<span class="nc" id="L61">        check = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture(</span>
+                &quot;check.png&quot;))));
+<span class="nc" id="L63">        back = new TextButton(&quot;RETURN&quot;, skin);</span>
+<span class="nc" id="L64">        sb = game.batch;</span>
+<span class="nc" id="L65">        this.inGame = inGame;</span>
+<span class="nc" id="L66">        Viewport viewport = new ScreenViewport(new OrthographicCamera());</span>
+<span class="nc" id="L67">        stage = new Stage(viewport, sb);</span>
+<span class="nc" id="L68">        table.reset();</span>
+<span class="nc" id="L69">        table.setBackground(background);</span>
+
+<span class="nc" id="L71">        Random rand = new Random();</span>
+<span class="nc" id="L72">        Integer config = rand.nextInt(3);</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        if (config == 0) {</span>
+<span class="nc" id="L74">            state = State.GAME1;</span>
+<span class="nc" id="L75">            pipes.add(new Pipe(1, 1));</span>
+<span class="nc" id="L76">            pipes.add(new Pipe(1, 0));</span>
+<span class="nc" id="L77">            pipes.add(new Pipe(1, 1));</span>
+<span class="nc" id="L78">            pipes.add(new Pipe(2, 0));</span>
+<span class="nc" id="L79">            pipes.add(new Pipe(3, 0));</span>
+<span class="nc" id="L80">            pipes.add(new Pipe(2, 2));</span>
+<span class="nc" id="L81">            pipes.add(new Pipe(1, 3));</span>
+<span class="nc" id="L82">            pipes.add(new Pipe(1, 2));</span>
+<span class="nc" id="L83">            pipes.add(new Pipe(1, 3));</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        }else if (config == 1){</span>
+<span class="nc" id="L85">            state = State.GAME2;</span>
+<span class="nc" id="L86">            pipes.add(new Pipe(0, 1));</span>
+<span class="nc" id="L87">            pipes.add(new Pipe(2, 1));</span>
+<span class="nc" id="L88">            pipes.add(new Pipe(1, 1));</span>
+<span class="nc" id="L89">            pipes.add(new Pipe(3, 0));</span>
+
+<span class="nc" id="L91">            pipes.add(new Pipe(3, 0));</span>
+<span class="nc" id="L92">            pipes.add(new Pipe(2, 0));</span>
+<span class="nc" id="L93">            pipes.add(new Pipe(1, 2));</span>
+<span class="nc" id="L94">            pipes.add(new Pipe(3, 0));</span>
+
+<span class="nc" id="L96">            pipes.add(new Pipe(1, 0));</span>
+<span class="nc" id="L97">            pipes.add(new Pipe(2, 3));</span>
+<span class="nc" id="L98">            pipes.add(new Pipe(0, 1));</span>
+<span class="nc" id="L99">            pipes.add(new Pipe(1, 1));</span>
+
+<span class="nc" id="L101">            pipes.add(new Pipe(1, 3));</span>
+<span class="nc" id="L102">            pipes.add(new Pipe(0, 1));</span>
+<span class="nc" id="L103">            pipes.add(new Pipe(0, 1));</span>
+<span class="nc" id="L104">            pipes.add(new Pipe(2, 3));</span>
+        }else{
+<span class="nc" id="L106">            state = State.GAME3;</span>
+<span class="nc" id="L107">            pipes.add(new Pipe(2, 1));</span>
+<span class="nc" id="L108">            pipes.add(new Pipe(2, 1));</span>
+<span class="nc" id="L109">            pipes.add(new Pipe(2, 1));</span>
+<span class="nc" id="L110">            pipes.add(new Pipe(1, 1));</span>
+
+<span class="nc" id="L112">            pipes.add(new Pipe(2, 0));</span>
+<span class="nc" id="L113">            pipes.add(new Pipe(3, 0));</span>
+<span class="nc" id="L114">            pipes.add(new Pipe(1, 2));</span>
+<span class="nc" id="L115">            pipes.add(new Pipe(0, 0));</span>
+
+<span class="nc" id="L117">            pipes.add(new Pipe(0, 0));</span>
+<span class="nc" id="L118">            pipes.add(new Pipe(1, 3));</span>
+<span class="nc" id="L119">            pipes.add(new Pipe(0, 1));</span>
+<span class="nc" id="L120">            pipes.add(new Pipe(1, 2));</span>
+
+<span class="nc" id="L122">            pipes.add(new Pipe(1, 3));</span>
+<span class="nc" id="L123">            pipes.add(new Pipe(0, 1));</span>
+<span class="nc" id="L124">            pipes.add(new Pipe(0, 1));</span>
+<span class="nc" id="L125">            pipes.add(new Pipe(0, 1));</span>
+        }
+
+<span class="nc" id="L128">        updateDraw();</span>
+<span class="nc" id="L129">    }</span>
+
+    /**
+     * Allows for the user to interact with the minigame pipes and buttons via clicking. Executes the necessary code
+     * when this occurs.
+     */
+    public void clickCheck() {
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        for (final Pipe pipe : pipes){</span>
+<span class="nc" id="L137">            pipe.getButton().addListener(new ClickListener() {</span>
+                @Override
+                public void clicked(InputEvent input, float x, float y) {
+<span class="nc" id="L140">                    table.reset();</span>
+<span class="nc" id="L141">                    pipe.rotate();</span>
+<span class="nc" id="L142">                    updateDraw();</span>
+<span class="nc" id="L143">                }</span>
+            });
+<span class="nc" id="L145">        }// Adds a listener to each pipe in the puzzle, to allow the pipe to rotate on click.</span>
+<span class="nc" id="L146">        this.check.addListener(new ClickListener(){</span>
+            @Override
+            public void clicked(InputEvent input, float x, float y) {
+<span class="nc" id="L149">                boolean flag = true;</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">                for (Pipe pipe : pipes){</span>
+<span class="nc" id="L151">                   flag = flag &amp; pipe.isCorrect();</span>
+<span class="nc" id="L152">                }</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">                if (flag == true){</span>
+<span class="nc" id="L154">                    table.reset();</span>
+<span class="nc" id="L155">                    state = State.WON;</span>
+<span class="nc" id="L156">                    updateDraw();</span>
+                }
+<span class="nc" id="L158">            }</span>
+        }); // Adds a listener to the check button. Upon being clicked the validity of each pipes configuration is tested.
+<span class="nc" id="L160">        this.back.addListener(new ClickListener() {</span>
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L163">                visibility(false);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                    if (!inGame) {</span>
+<span class="nc" id="L165">                        Kroy.mainMenuScreen.state = MenuScreen.MenuScreenState.MAINMENU;</span>
+                    }
+                    else {
+<span class="nc" id="L168">                        Kroy.mainGameScreen.setGameState(GameScreen.GameScreenState.RUN);</span>
+                    }
+<span class="nc" id="L170">                    return;</span>
+            }
+        });// Returns the user to the screen they were in before the minigame was started.
+<span class="nc" id="L173">    }</span>
+
+    /**
+     * Draws the pipes in their current rotation once a click event occurs. Also draws the end of game screen
+     * if the user correctly completes the puzzle.
+     */
+    public void updateDraw(){
+<span class="nc bnc" id="L180" title="All 4 branches missed.">        switch(state) {</span>
+            case GAME1:
+<span class="nc" id="L182">                table.row();</span>
+<span class="nc" id="L183">                table.add(new Image(new Texture(&quot;waterarrow.png&quot;)));</span>
+<span class="nc" id="L184">                table.add(pipes.get(0).getButton());</span>
+<span class="nc" id="L185">                table.add(pipes.get(1).getButton());</span>
+<span class="nc" id="L186">                table.add(pipes.get(2).getButton());</span>
+<span class="nc" id="L187">                table.add().width(320);</span>
+
+
+<span class="nc" id="L190">                table.row();</span>
+<span class="nc" id="L191">                table.add().width(160);</span>
+<span class="nc" id="L192">                table.add(pipes.get(3).getButton());</span>
+<span class="nc" id="L193">                table.add(pipes.get(4).getButton());</span>
+<span class="nc" id="L194">                table.add(pipes.get(5).getButton());</span>
+<span class="nc" id="L195">                table.add().width(320);</span>
+
+
+<span class="nc" id="L198">                table.row();</span>
+<span class="nc" id="L199">                table.add().width(160);</span>
+<span class="nc" id="L200">                table.add(pipes.get(6).getButton());</span>
+<span class="nc" id="L201">                table.add(pipes.get(7).getButton());</span>
+<span class="nc" id="L202">                table.add(pipes.get(8).getButton());</span>
+<span class="nc" id="L203">                table.add(new Image(new Texture(&quot;waterout.png&quot;)));</span>
+<span class="nc" id="L204">                table.add().width(160);</span>
+
+<span class="nc" id="L206">                table.row();</span>
+<span class="nc" id="L207">                table.add().width(160);</span>
+<span class="nc" id="L208">                table.add().width(128);</span>
+<span class="nc" id="L209">                table.add().width(128);</span>
+<span class="nc" id="L210">                table.add().width(128);</span>
+<span class="nc" id="L211">                table.add(check);</span>
+<span class="nc" id="L212">                table.add().width(160);</span>
+
+                // Draws the puzzle out in a table where each cell is a pipe in the puzzle.
+<span class="nc" id="L215">                table.setFillParent(true);</span>
+<span class="nc" id="L216">                stage.addActor(table);</span>
+<span class="nc" id="L217">                break;</span>
+            case GAME2:
+            case GAME3:
+<span class="nc" id="L220">                table.row();</span>
+<span class="nc" id="L221">                table.add(new Image(new Texture(&quot;waterarrow.png&quot;)));</span>
+<span class="nc" id="L222">                table.add(pipes.get(0).getButton());</span>
+<span class="nc" id="L223">                table.add(pipes.get(1).getButton());</span>
+<span class="nc" id="L224">                table.add(pipes.get(2).getButton());</span>
+<span class="nc" id="L225">                table.add(pipes.get(3).getButton());</span>
+<span class="nc" id="L226">                table.add().width(160);</span>
+
+<span class="nc" id="L228">                table.row();</span>
+<span class="nc" id="L229">                table.add().width(160);</span>
+<span class="nc" id="L230">                table.add(pipes.get(4).getButton());</span>
+<span class="nc" id="L231">                table.add(pipes.get(5).getButton());</span>
+<span class="nc" id="L232">                table.add(pipes.get(6).getButton());</span>
+<span class="nc" id="L233">                table.add(pipes.get(7).getButton());</span>
+<span class="nc" id="L234">                table.add().width(160);</span>
+
+<span class="nc" id="L236">                table.row();</span>
+<span class="nc" id="L237">                table.add().width(160);</span>
+<span class="nc" id="L238">                table.add(pipes.get(8).getButton());</span>
+<span class="nc" id="L239">                table.add(pipes.get(9).getButton());</span>
+<span class="nc" id="L240">                table.add(pipes.get(10).getButton());</span>
+<span class="nc" id="L241">                table.add(pipes.get(11).getButton());</span>
+<span class="nc" id="L242">                table.add().width(160);</span>
+
+<span class="nc" id="L244">                table.row();</span>
+<span class="nc" id="L245">                table.add().width(160);</span>
+<span class="nc" id="L246">                table.add(pipes.get(12).getButton());</span>
+<span class="nc" id="L247">                table.add(pipes.get(13).getButton());</span>
+<span class="nc" id="L248">                table.add(pipes.get(14).getButton());</span>
+<span class="nc" id="L249">                table.add(pipes.get(15).getButton());</span>
+<span class="nc" id="L250">                table.add(new Image(new Texture(&quot;waterout.png&quot;)));</span>
+
+<span class="nc" id="L252">                table.row();</span>
+<span class="nc" id="L253">                table.add().width(160);</span>
+<span class="nc" id="L254">                table.add().width(128);</span>
+<span class="nc" id="L255">                table.add().width(128);</span>
+<span class="nc" id="L256">                table.add().width(128);</span>
+<span class="nc" id="L257">                table.add().width(128);</span>
+<span class="nc" id="L258">                table.add(check);</span>
+
+<span class="nc" id="L260">                table.setFillParent(true);</span>
+<span class="nc" id="L261">                stage.addActor(table);</span>
+<span class="nc" id="L262">                break;</span>
+
+            case WON:
+<span class="nc" id="L265">                table.row();</span>
+<span class="nc" id="L266">                table.add(new Image(new Texture(&quot;minigamewin.png&quot;)));</span>
+<span class="nc" id="L267">                table.row();</span>
+<span class="nc" id="L268">                table.add(back).width(Kroy.width/3);</span>
+                // Displays the win screen, including a button to return out of the minigame.
+
+<span class="nc" id="L271">                table.setFillParent(true);</span>
+<span class="nc" id="L272">                stage.addActor(table);</span>
+                break;
+        }
+<span class="nc" id="L275">    }</span>
+
+    /**
+     * Determines if the minigame is visible to the user
+     * @param state true if visible, false if not
+     */
+    public void visibility(boolean state){
+<span class="nc" id="L282">        this.table.setVisible(state);</span>
+<span class="nc" id="L283">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

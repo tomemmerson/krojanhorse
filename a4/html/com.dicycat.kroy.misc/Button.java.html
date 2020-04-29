@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Button.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.misc</a> &gt; <span class="el_source">Button.java</span></div><h1>Button.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.misc;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.dicycat.kroy.Kroy;
+import com.badlogic.gdx.graphics.Texture;
+
+/**
+* Class which handles the buttons used on the main menu. Contains the two textures need for active and incactive states
+ * as well as the y coordinate. X coordinate is not needed as menu buttons are centered to the screen.
+* @author Jordan Spooner - NP STUDIOS
+*
+*/
+
+public class Button {
+
+	private int buttonY;
+	private Texture buttonActive;
+	private Texture button;
+	private Kroy game;
+	
+<span class="nc" id="L22">	private final int BUTTON_WIDTH = 250;</span>
+<span class="nc" id="L23">	private final int BUTTON_HEIGHT = 50;</span>
+
+<span class="nc" id="L25">	private int xAxisCentred = (Kroy.width/2) - (BUTTON_WIDTH /2);</span>
+
+<span class="nc" id="L27">	public Button(int buttonY, Texture button, Texture buttonActive, Kroy game) {</span>
+<span class="nc" id="L28">		this.buttonY = buttonY;</span>
+<span class="nc" id="L29">		this.button = button;</span>
+<span class="nc" id="L30">		this.buttonActive = buttonActive;</span>
+<span class="nc" id="L31">		this.game = game;</span>
+<span class="nc" id="L32">	}</span>
+	
+	/**
+	 * Button code, returns true if the button is clicked and false otherwise
+	 * Also, if the mouse is on the button, the button changes to a different image of the button.
+	 */
+	public boolean buttonAction() {
+		//if the mouse is on the button ...
+<span class="nc bnc" id="L40" title="All 8 branches missed.">		if(( (Gdx.input.getX() &lt; (xAxisCentred + BUTTON_WIDTH)) &amp;&amp; (Gdx.input.getX() &gt; xAxisCentred) ) &amp;&amp; ( (Kroy.height - Gdx.input.getY() &gt; buttonY ) &amp;&amp; (Kroy.height - Gdx.input.getY() &lt; (buttonY + BUTTON_HEIGHT)) ) ){</span>
+			// ... then display the 'controlsButtonActive' texture ...
+<span class="nc" id="L42">			game.batch.draw(buttonActive, xAxisCentred, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT);</span>
+			
+			  // if the controls button is pressed, show the visibility of the controls window to true and set the game state to CONTROLS
+<span class="nc bnc" id="L45" title="All 2 branches missed.">			  if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {</span>
+				  // if button pressed, return true
+<span class="nc" id="L47">				  return true;</span>
+			  }
+		  } else {
+			// ... otherwise, display the 'controlsButton' texture (as the mouse is neither clicking nor on the button, so display the default texture)
+<span class="nc" id="L51">			  game.batch.draw(button, xAxisCentred, buttonY, BUTTON_WIDTH, BUTTON_HEIGHT);</span>
+		  }
+		
+		// nothing is happening with the button so just return false, no actions are being performed on it
+<span class="nc" id="L55">		return false;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

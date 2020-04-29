@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OptionsWindow.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.scenes</a> &gt; <span class="el_source">OptionsWindow.java</span></div><h1>OptionsWindow.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.scenes;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dicycat.kroy.Kroy;
+import com.dicycat.kroy.screens.GameScreen;
+import com.dicycat.kroy.screens.MenuScreen;
+
+/**
+ * Options window
+ * 
+ * @author Michele Imbriani
+ *
+ */
+public class OptionsWindow {
+	
+	public Stage stage;
+<span class="nc" id="L30">	public Table table = new Table();</span>
+	private SpriteBatch sb;
+<span class="nc" id="L32">	private NinePatch patch = new NinePatch(new Texture(&quot;loool.jpg&quot;), 3, 3, 3, 3);</span>
+<span class="nc" id="L33">	private NinePatchDrawable background = new NinePatchDrawable(patch);</span>
+	
+<span class="nc" id="L35">    private Skin skin = new Skin(Gdx.files.internal(&quot;uiskin.json&quot;));</span>
+
+    //options page 1
+<span class="nc" id="L38">    private TextButton music = new TextButton(&quot;MUSIC&quot;, skin);</span>
+<span class="nc" id="L39">    private TextButton debug = new TextButton(&quot;DEBUG&quot;, skin);</span>
+<span class="nc" id="L40">    private TextButton back = new TextButton(&quot;BACK&quot;, skin);</span>
+    
+    //music options page
+<span class="nc" id="L43">    private TextButton stopMusic = new TextButton(&quot;STOP MUSIC&quot;, skin);</span>
+<span class="nc" id="L44">    private TextButton playMusic = new TextButton(&quot;PLAY MUSIC&quot;, skin);</span>
+<span class="nc" id="L45">    private TextButton volumeDown = new TextButton(&quot;MUTE VOLUME&quot;, skin);</span>
+<span class="nc" id="L46">    private TextButton volumeUp = new TextButton(&quot;UNMUTE VOLUME&quot;, skin);</span>
+<span class="nc" id="L47">    private TextButton backFromMusic = new TextButton(&quot;BACK&quot;, skin);</span>
+    
+    //debug options page
+<span class="nc" id="L50">    private TextButton showDebug = new TextButton(&quot;SHOW DEBUG&quot;, skin);</span>
+<span class="nc" id="L51">    private TextButton hideDebug = new TextButton(&quot;HIDE DEBUG&quot;, skin);</span>
+<span class="nc" id="L52">    private TextButton backFromDebug = new TextButton(&quot;BACK&quot;, skin);</span>
+    
+<span class="nc" id="L54">    public static State state = State.PAGE1;</span>
+    
+    /**
+     *	Allows to have multiple 'pages' of the Option window without
+     *	having to create several stages.
+     */
+<span class="nc" id="L60">    public enum State{</span>
+<span class="nc" id="L61">		PAGE1,</span>
+<span class="nc" id="L62">		MUSIC,</span>
+<span class="nc" id="L63">		DEBUG,</span>
+	}
+
+	/**
+	 * 	The important feature is the updateDraw() method
+	 * 	which can be found at the bottom.
+	 * 
+	 * @param game
+	 */
+<span class="nc" id="L72">	public OptionsWindow(Kroy game) {</span>
+<span class="nc" id="L73">		sb = game.batch;</span>
+<span class="nc" id="L74">		Viewport viewport = new ScreenViewport(new OrthographicCamera());</span>
+<span class="nc" id="L75">		stage = new Stage(viewport, sb);</span>
+
+<span class="nc" id="L77">		table.reset();</span>
+<span class="nc" id="L78">		table.setBackground(background);</span>
+<span class="nc" id="L79">		updateDraw();</span>
+<span class="nc" id="L80">	}</span>
+
+	/** Allows the window to be visible or hidden
+	 * @param state	true means visible, false means hidden
+	 */
+	public void visibility(boolean state){
+<span class="nc" id="L86">		this.table.setVisible(state);</span>
+<span class="nc" id="L87">	}</span>
+	
+	/**
+	 * Takes screen as attribute because the 'back' button behaves differently
+	 *  based on whether the optionwindow was called from menu or gamescreen
+	 *  
+	 * @param fromMenu
+	 */
+	public void clickCheck(final boolean fromMenu) {
+	//page 1
+		//resume button
+<span class="nc" id="L98">		this.music.addListener(new ClickListener() {</span>
+	    	@Override
+	    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L101">	    		table.reset();</span>
+<span class="nc" id="L102">	    		state = State.MUSIC;</span>
+<span class="nc" id="L103">	    		updateDraw();</span>
+<span class="nc" id="L104">	    	}</span>
+	    });
+
+		//debug button
+<span class="nc" id="L108">		this.debug.addListener(new ClickListener() {</span>
+	    	@Override
+	    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L111">	    		table.reset();</span>
+<span class="nc" id="L112">	    		state = State.DEBUG;</span>
+<span class="nc" id="L113">	    		updateDraw();</span>
+<span class="nc" id="L114">	    	}</span>
+	    });
+		//back button
+<span class="nc" id="L117">			this.back.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L120">		    		visibility(false);</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		    		if (fromMenu == false) {</span>
+<span class="nc" id="L122">		    			Kroy.mainGameScreen.setGameState(GameScreen.GameScreenState.PAUSE);</span>
+<span class="nc" id="L123">		    			return;</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">		    		} else if (fromMenu) {</span>
+<span class="nc" id="L125">		    			Kroy.mainMenuScreen.state = MenuScreen.MenuScreenState.MAINMENU;</span>
+<span class="nc" id="L126">		    			return;</span>
+		    		}
+<span class="nc" id="L128">		    	}</span>
+		    });
+			
+	//music page
+			//playStopMusic button
+<span class="nc" id="L133">			this.playMusic.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		    		if (MenuScreen.music.isPlaying() == false) {</span>
+<span class="nc" id="L137">		    			MenuScreen.music.play();  </span>
+		    		}
+<span class="nc" id="L139">		    		}</span>
+		    });
+			//playStopMusic button
+<span class="nc" id="L142">			this.stopMusic.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		    		if (MenuScreen.music.isPlaying()){</span>
+<span class="nc" id="L146">		    			MenuScreen.music.stop();</span>
+		    		} 
+<span class="nc" id="L148">		    		}</span>
+		    });
+			//volumeDown button
+<span class="nc" id="L151">			this.volumeDown.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L154">		    			MenuScreen.musicVolume = 0;</span>
+<span class="nc" id="L155">		    			MenuScreen.music.setVolume((float)MenuScreen.musicVolume);</span>
+
+<span class="nc" id="L157">		    	}</span>
+		    });
+			//volumeUp button
+<span class="nc" id="L160">			this.volumeUp.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L163">		    			MenuScreen.musicVolume = 1;</span>
+<span class="nc" id="L164">		    			MenuScreen.music.setVolume((float)MenuScreen.musicVolume);</span>
+<span class="nc" id="L165">		    	}</span>
+		    });
+			//backFromMusic button
+<span class="nc" id="L168">			this.backFromMusic.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L171">		    		table.reset();</span>
+<span class="nc" id="L172">		    		state = State.PAGE1;</span>
+<span class="nc" id="L173">		    		updateDraw();</span>
+<span class="nc" id="L174">		    	}</span>
+		    });
+			
+	//debug page
+			//showDebug button
+<span class="nc" id="L179">			this.showDebug.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L182">		    		GameScreen.showDebug = true;</span>
+<span class="nc" id="L183">		    		}</span>
+		    });
+			//hideDebug button
+<span class="nc" id="L186">			this.hideDebug.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L189">		    		GameScreen.showDebug = false;</span>
+<span class="nc" id="L190">		    		}</span>
+		    });
+			//backFromDebug button
+<span class="nc" id="L193">			this.backFromDebug.addListener(new ClickListener() {</span>
+		    	@Override
+		    	public void clicked(InputEvent event, float x, float y) {
+<span class="nc" id="L196">		    		table.reset();</span>
+<span class="nc" id="L197">		    		state = State.PAGE1;</span>
+<span class="nc" id="L198">		    		updateDraw();</span>
+<span class="nc" id="L199">		    	}</span>
+		    });
+<span class="nc" id="L201">	}</span>
+
+	/**
+	 *	This function allows the table to change its content based 
+	 *	on which page of the OptionsWindow we are on.
+	 *	
+	 *	By being called in the Screen's render method, the Options window
+	 *	gets reset and refreshed every rendering loop: this way we are able to 
+	 *	have several 'pages' within the same table.
+	 * 
+	 */
+	public void updateDraw() {
+<span class="nc bnc" id="L213" title="All 4 branches missed.">		switch(state) {</span>
+			case PAGE1:
+<span class="nc" id="L215">				table.row();</span>
+<span class="nc" id="L216">			    table.add(music).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L217">				table.row();</span>
+<span class="nc" id="L218">			    table.add(debug).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L219">			    table.row();</span>
+<span class="nc" id="L220">			    table.add(back).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L221">			    break;</span>
+			case MUSIC:
+<span class="nc" id="L223">				table.row();</span>
+<span class="nc" id="L224">			    table.add(playMusic).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L225">			    table.row();</span>
+<span class="nc" id="L226">			    table.add(stopMusic).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L227">			    table.row();</span>
+<span class="nc" id="L228">			    table.add(volumeDown).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L229">			    table.row();</span>
+<span class="nc" id="L230">			    table.add(volumeUp).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L231">			    table.row();</span>
+<span class="nc" id="L232">			    table.add(backFromMusic).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L233">			    break;</span>
+			case DEBUG:
+<span class="nc" id="L235">				table.row();</span>
+<span class="nc" id="L236">			    table.add(showDebug).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L237">			    table.row();</span>
+<span class="nc" id="L238">			    table.add(hideDebug).width(Kroy.CentreWidth());</span>
+<span class="nc" id="L239">			    table.row();</span>
+<span class="nc" id="L240">			    table.add(backFromDebug).width(Kroy.CentreWidth());</span>
+			    break;
+		}
+		
+<span class="nc" id="L244">		table.setFillParent(true);</span>
+<span class="nc" id="L245">	    stage.addActor(table);</span>
+<span class="nc" id="L246">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

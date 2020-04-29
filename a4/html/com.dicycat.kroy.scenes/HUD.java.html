@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HUD.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.scenes</a> &gt; <span class="el_source">HUD.java</span></div><h1>HUD.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.scenes;
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.dicycat.kroy.Kroy;
+
+import static java.lang.Math.abs;
+
+/**
+ * HUD window
+ * 
+ * @author Michele Imbriani
+ *
+ */
+public class HUD {
+	public Stage stage;
+	private Viewport viewport;	//creating new port so that the HUD stays locked while map can move around independently
+<span class="nc" id="L25">	private Integer trucks = 4;</span>
+
+	// FORTRESS_IMPROVE_2 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE
+	//  Deleted world timer attribute and changed to timer
+<span class="nc" id="L29">	public static float timer = 0;</span>
+	// FORTRESS_IMPROVE_2 - END OF MODIFICATION - NP STUDIOS
+
+<span class="nc" id="L32">	private Integer score = 0;</span>
+
+	// SCREEN_COUNTDOWN_1 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE
+	// Added attribute for the timer that shows on screen - set to 15 minutes
+	private float screenTimer;
+	// SCREEN_COUNTDOWN_1 - END OF MODIFICATION - NP STUDIOS
+
+	private float initialTime;
+	
+	private Label scoreLabel;
+	private Label timeLabel;
+	private Label fortressLabel;
+	private Label timerLabel;
+	private Label scoreCountLabel;
+	private Label fortressCountLabel;
+
+	
+	
+	/**
+	 */
+<span class="nc" id="L52">	public HUD(SpriteBatch sb, float timeLimit) {</span>
+<span class="nc" id="L53">		screenTimer = timeLimit;</span>
+<span class="nc" id="L54">		initialTime = timeLimit;</span>
+<span class="nc" id="L55">		viewport = new ScreenViewport(new OrthographicCamera());</span>
+<span class="nc" id="L56">		stage = new Stage(viewport, sb);	//Where we are going to put the HUD elements </span>
+		
+<span class="nc" id="L58">		Table tableHUD = new Table();	//this allows to put widgets in the scene in a clean and ordered way</span>
+<span class="nc" id="L59">		tableHUD.top();	// puts widgets from the top instead of from the centre</span>
+<span class="nc" id="L60">		tableHUD.setFillParent(true);	//makes the table the same size of the stage</span>
+
+		// SCREEN_COUNTDOWN_2 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE
+		// Changed attribute being displayed in time label and changed the label text
+<span class="nc" id="L64">		timerLabel = new Label(String.format(&quot;%.0f&quot;, screenTimer), new Label.LabelStyle(new BitmapFont(), Color.WHITE));</span>
+<span class="nc" id="L65">		timeLabel = new Label(&quot;TIME LEFT UNTIL FIRE STATION DESTROYED:&quot;, new Label.LabelStyle(new BitmapFont(), Color.WHITE));</span>
+		// SCREEN_COUNTDOWN_2 - END OF MODIFICATION - NP STUDIOS
+<span class="nc" id="L67">		scoreCountLabel = new Label(String.format(&quot;%06d&quot;, score), new Label.LabelStyle(new BitmapFont(), Color.WHITE));</span>
+<span class="nc" id="L68">		scoreLabel = new Label(&quot;SCORE:&quot;, new Label.LabelStyle(new BitmapFont(), Color.WHITE));</span>
+		// FORTRESS_COUNT_1 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		// Sets start value of fortress count to 6
+<span class="nc" id="L71">		fortressLabel = new Label(&quot;FORTRESSES REMAINING:&quot;, new Label.LabelStyle(new BitmapFont(), Color.WHITE));</span>
+<span class="nc" id="L72">		fortressCountLabel = new Label(String.format(&quot;%01d&quot;, 6), new Label.LabelStyle(new BitmapFont(), Color.WHITE));</span>
+		// FORTRESS_COUNT_1 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		
+
+<span class="nc" id="L76">		tableHUD.add(timeLabel).expandX().padTop(10);</span>
+<span class="nc" id="L77">		tableHUD.add(timerLabel).expandX().padTop(10);</span>
+<span class="nc" id="L78">		tableHUD.add(scoreLabel).expandX().padTop(10);			// expandX so that all elements take up the same amount of space</span>
+<span class="nc" id="L79">		tableHUD.add(scoreCountLabel).expandX().padTop(10);</span>
+		// FORTRESS_COUNT_2 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+<span class="nc" id="L81">		tableHUD.add(fortressLabel).expandX().padTop(10);</span>
+<span class="nc" id="L82">		tableHUD.add(fortressCountLabel).expandX().padTop(10);</span>
+		// FORTRESS_COUNT_2 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		
+<span class="nc" id="L85">		stage.addActor(tableHUD);</span>
+		
+<span class="nc" id="L87">	}</span>
+	
+	/**
+	 * Increments the timer using delta time so that it will count up in seconds. Updates the labels in the HUD:
+	 * the timer label, the score label and the fortress count label
+	 * @param dt delta time
+	 */
+	public void update(float dt) {
+		// SCREEN_COUNTDOWN_3 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE
+		// Decrementing the timer shown on screen
+<span class="nc bnc" id="L97" title="All 2 branches missed.">		if (screenTimer &gt; 0) {</span>
+<span class="nc" id="L98">		screenTimer -= dt; }</span>
+<span class="nc" id="L99">		timer += dt;</span>
+<span class="nc" id="L100">		timerLabel.setText(String.format(&quot;%.0f&quot;, abs(screenTimer)));</span>
+		// SCREEN_COUNTDOWN_3 - END OF MODIFICATION - NP STUDIOS
+
+<span class="nc" id="L103">		scoreCountLabel.setText(String.format(&quot;%06d&quot;, score));</span>
+
+		// FORTRESS_COUNT_3 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		// Updates the count depending on the amount of fortresses still alive
+<span class="nc" id="L107">		fortressCountLabel.setText(String.format(&quot;%01d&quot;, Kroy.mainGameScreen.getFortressesCount()));</span>
+		// FORTRESS_COUNT_3 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT
+<span class="nc" id="L109">	}</span>
+
+	public void setTimer(float newTime) {
+<span class="nc" id="L112">		screenTimer = newTime;</span>
+<span class="nc" id="L113">		timer = initialTime - newTime;</span>
+<span class="nc" id="L114">	}</span>
+
+	public Integer getFinalScore() {
+<span class="nc" id="L117">		return score;</span>
+	}
+
+	// CODE_REFACTOR_5 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+	// Deleted unused methods
+	// CODE_REFACTOR_5 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT
+
+	/** Updates the score variable
+	 * @param x	points to be added to the score
+	 */
+	public void updateScore(Integer x){
+<span class="nc" id="L128">		score += x;</span>
+<span class="nc" id="L129">	}</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>

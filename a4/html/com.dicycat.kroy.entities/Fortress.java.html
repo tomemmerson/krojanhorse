@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Fortress.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">core</a> &gt; <a href="index.source.html" class="el_package">com.dicycat.kroy.entities</a> &gt; <span class="el_source">Fortress.java</span></div><h1>Fortress.java</h1><pre class="source lang-java linenums">package com.dicycat.kroy.entities;
+
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
+import com.dicycat.kroy.Kroy;
+import com.dicycat.kroy.bullets.Bullet;
+import com.dicycat.kroy.bullets.BulletDispenser;
+import com.dicycat.kroy.bullets.Pattern;
+import com.dicycat.kroy.misc.StatBar;
+
+/**
+ * Hostile building which fires at the player when within its radius.
+ */
+
+public class Fortress extends Entity {
+
+	private BulletDispenser dispenser;
+	private Texture deadTexture;
+	private StatBar healthBar;
+	// FORTRESS_DAMAGE_1 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE ----
+	private int damage; 	// Added a new attribute 'damage'
+	// FORTRESS_DAMAGE_1 - END OF MODIFICATION - NP STUDIOS
+	private int fortressID;
+	private Vector2 fortressSize;
+
+	/**
+	 * @param spawnPos
+	 * @param fortressTexture
+	 * @param deadTexture
+	 * @param size
+	 */
+
+	// FORTRESS_HEALTH_2 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE ----
+	// Added health parameter to Fortress constructor and changed it in the call to super from &quot;500&quot; to &quot;health&quot;
+	public Fortress(Vector2 spawnPos, Texture fortressTexture, Texture deadTexture, Vector2 size, int health, int fortressDamage, int entityDifficulty, int fortressID) { ////
+<span class="nc" id="L36">		super(spawnPos, fortressTexture, size, health, 500, entityDifficulty);</span>
+	// FORTRESS_HEALTH_2 - END OF MODIFICATION - NP STUDIOS
+<span class="nc" id="L38">		this.damage = fortressDamage;</span>
+
+		// FORTRESS_DAMAGE_3 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE ----
+		// Added fortressDamage as a parameter to the constructor above
+
+<span class="nc" id="L43">		this.fortressID = fortressID;</span>
+<span class="nc" id="L44">		this.fortressSize = size;</span>
+
+		// Passed the damage to the Pattern constructors
+
+<span class="nc" id="L48">		dispenser = new BulletDispenser(this);</span>
+<span class="nc" id="L49">		dispenser.addPattern(new Pattern(180, 300, 800, 0.1f, 20, 1, 0.5f, this.getDamage(), entityDifficulty));</span>
+<span class="nc" id="L50">		dispenser.addPattern(new Pattern(100, 500, 0.5f, 8, 5, 0.5f, this.getDamage(), entityDifficulty));</span>
+<span class="nc" id="L51">		dispenser.addPattern(new Pattern(0, 50, 800, 2f, 3, 36, 4, this.getDamage(), entityDifficulty));</span>
+<span class="nc" id="L52">		dispenser.addPattern(new Pattern(200, 600, 0.3f, 12, 2, 0.3f, this.getDamage(), entityDifficulty));</span>
+<span class="nc" id="L53">		dispenser.addPattern(new Pattern(false, 0, 3, 100, 900, 0.02f, 1, 0.2f, this.getDamage(), entityDifficulty));</span>
+<span class="nc" id="L54">		dispenser.addPattern(new Pattern(true, 0, 1, 100, 900, 0.02f, 1, 1.2f,this.getDamage(), entityDifficulty));</span>
+
+		// FORTRESS_HEALTH_3 - END OF MODIFICATION - NP STUDIOS
+
+<span class="nc" id="L58">		this.deadTexture = deadTexture;</span>
+
+		// END_GAME_FIX_2 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT
+		// Deleted addFortress call
+		// END_GAME_FIX_2 - END OF MODIFICATION - NP STUDIOS
+
+<span class="nc" id="L64">		healthBar = new StatBar(new Vector2(getCentre().x, getCentre().y + 100), &quot;Red.png&quot;, 10);</span>
+<span class="nc" id="L65">		Kroy.mainGameScreen.addGameObject(healthBar);</span>
+<span class="nc" id="L66">	}</span>
+
+	/**
+	 * Removes from active pool and displays destroyed texture
+	 */
+	@Override
+	public void die() {
+<span class="nc" id="L73">		super.die();</span>
+<span class="nc" id="L74">		sprite.setTexture(deadTexture);</span>
+<span class="nc" id="L75">		Kroy.mainGameScreen.getHud().updateScore(1000);</span>
+<span class="nc" id="L76">		healthBar.setRemove(true);</span>
+<span class="nc" id="L77">		displayable = true;</span>
+<span class="nc" id="L78">		Kroy.mainGameScreen.removeFortress();</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">		if (Kroy.mainGameScreen.getFortressesCount() == 0) {//If last fortress</span>
+			// HIGHSCORE_5 - START OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+			// Added a bonus to the score if the use finishes the game before the firestation is destroyed. Calculated
+			// using time remaining.
+<span class="nc" id="L83">			Kroy.mainGameScreen.getHud().updateScore((int) ((15 * 60) - Kroy.mainGameScreen.getHud().timer) * 10); //time remaining bonus</span>
+			// HIGHSCORE_5 - END OF MODIFICATION - NP STUDIOS - LUCY IVATT----
+<span class="nc" id="L85">			Kroy.mainGameScreen.gameOver(true); 					//End game WIN</span>
+		}
+<span class="nc" id="L87">	}</span>
+
+	/**
+	 * Apply certain amount of damage to the entity and updates the health bar
+	 * @param damage Amount of damage to apply to the Fortress
+	 *
+	 * Edited by Lucy Ivatt - NP STUDIOS
+	 */
+	@Override
+	public void applyDamage(float damage) {
+<span class="nc" id="L97">		super.applyDamage(damage);</span>
+<span class="nc" id="L98">		healthBar.setPosition(getCentre().add(0, (getHeight() / 2) + 25));</span>
+<span class="nc" id="L99">		healthBar.setBarDisplay((healthPoints*500)/maxHealthPoints);</span>
+<span class="nc" id="L100">	}</span>
+
+	/**
+	 * Updates the dispenser associated with the fortress and adds bullets to the mainGameScreen
+	 */
+	@Override
+	public void update() {
+		//weapons
+<span class="nc" id="L108">		Bullet[] toShoot = dispenser.update(playerInRadius());</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		if (toShoot != null) {</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">			for (Bullet bullet : toShoot) {</span>
+<span class="nc" id="L111">				bullet.fire(getCentre());</span>
+<span class="nc" id="L112">				Kroy.mainGameScreen.addGameObject(bullet);</span>
+			}
+		}
+
+<span class="nc" id="L116">	}</span>
+
+	public int getDamage(){				// FORTRESS_DAMAGE_2 - START OF MODIFICATION - NP STUDIOS - CASSANDRA LILLYSTONE ----
+<span class="nc" id="L119">		return this.damage;				// Implemented a getter for damage</span>
+	}									// FORTRESS_DAMAGE_2 - END OF MODIFICATION - NP STUDIOS
+
+<span class="nc" id="L122">	public int getFortressID() { return fortressID; }</span>
+<span class="nc" id="L123">	public Vector2 getFortressSize() { return fortressSize; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.3.201901230119</span></div></body></html>
